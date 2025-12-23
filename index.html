@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Tracker | Live Pro</title>
+    <title>Elite Athlete Tracker | Full Track & Field</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -23,26 +23,49 @@
         #reviewSection { display: none; margin-top: 15px; }
         .review-item { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--primary); }
         canvas { max-height: 250px; }
+        optgroup { font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <h2 style="margin:0 0 15px 0">🏆 Athlete Tracker (Live Cloud)</h2>
+        <h2 style="margin:0 0 15px 0">🏆 Track & Field Tracker</h2>
         <div class="form-grid">
             <div><label>Athlete Name</label><input type="text" id="pName" placeholder="Name"></div>
             <div>
                 <label>Event</label>
                 <select id="sName">
-                    <option value="100m Sprint">100m Sprint</option>
-                    <option value="200m Sprint">200m Sprint</option>
-                    <option value="Long Jump">Long Jump</option>
-                    <option value="High Jump">High Jump</option>
+                    <optgroup label="Sprints">
+                        <option value="100m Sprint">100m Sprint</option>
+                        <option value="200m Sprint">200m Sprint</option>
+                        <option value="400m Sprint">400m Sprint</option>
+                    </optgroup>
+                    <optgroup label="Middle/Long Distance">
+                        <option value="800m Run">800m Run</option>
+                        <option value="1500m Run">1500m Run</option>
+                        <option value="5000m Run">5000m Run</option>
+                    </optgroup>
+                    <optgroup label="Hurdles">
+                        <option value="110m Hurdles">110m Hurdles</option>
+                        <option value="400m Hurdles">400m Hurdles</option>
+                    </optgroup>
+                    <optgroup label="Jumps">
+                        <option value="Long Jump">Long Jump</option>
+                        <option value="High Jump">High Jump</option>
+                        <option value="Triple Jump">Triple Jump</option>
+                        <option value="Pole Vault">Pole Vault</option>
+                    </optgroup>
+                    <optgroup label="Throws">
+                        <option value="Shot Put">Shot Put</option>
+                        <option value="Discus Throw">Discus Throw</option>
+                        <option value="Javelin Throw">Javelin Throw</option>
+                        <option value="Hammer Throw">Hammer Throw</option>
+                    </optgroup>
                 </select>
             </div>
             <div><label>Date</label><input type="date" id="pDate"></div>
-            <div><label>Score</label><input type="number" id="pScore" step="0.01" placeholder="0.00"></div>
+            <div><label>Score (Sec/Mtrs)</label><input type="number" id="pScore" step="0.01" placeholder="0.00"></div>
         </div>
         <button class="btn-main" style="margin-top:20px" onclick="saveData()">Sync to Cloud</button>
     </div>
@@ -67,7 +90,7 @@
 </div>
 
 <script>
-    // --- YOUR FIREBASE CONFIG FROM SCREENSHOT ---
+    // --- YOUR FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
         authDomain: "athletetracker-5efd6.firebaseapp.com",
@@ -115,13 +138,20 @@
             for (let sportKey in db[player]) {
                 const records = Object.values(db[player][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
                 const scores = records.map(r => r.score);
-                const pb = sportKey.includes("Sprint") ? Math.min(...scores) : Math.max(...scores);
+                
+                // PB Logic: Sprints/Hurdles/Runs need MIN time, Jumps/Throws need MAX distance
+                const isTimeEvent = sportKey.toLowerCase().includes("sprint") || 
+                                  sportKey.toLowerCase().includes("run") || 
+                                  sportKey.toLowerCase().includes("hurdles");
+                
+                const pb = isTimeEvent ? Math.min(...scores) : Math.max(...scores);
+                const unit = isTimeEvent ? "s" : "m";
 
                 html += `
                     <div style="margin-top:20px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <strong>🔥 ${sportKey}</strong>
-                            <span class="pb-badge">🏆 PB: ${pb}</span>
+                            <span class="pb-badge">🏆 PB: ${pb}${unit}</span>
                         </div>
                         <canvas id="chart-${player.replace(/\s/g, '')}-${sportKey}"></canvas>
                     </div>
@@ -138,7 +168,7 @@
                     data: {
                         labels: records.map(r => r.date),
                         datasets: [{ 
-                            label: 'Score', 
+                            label: 'Performance', 
                             data: records.map(r => r.score), 
                             borderColor: '#2563eb', 
                             backgroundColor: 'rgba(37, 99, 235, 0.1)',
