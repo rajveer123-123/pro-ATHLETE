@@ -3,64 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Tracker + Coach Review</title>
+    <title>Athlete Tracker Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --bg: #f1f5f9; }
+        :root { --primary: #2563eb; --danger: #ef4444; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .container { max-width: 500px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .container { max-width: 600px; margin: auto; }
+        .main-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         
-        /* Review Accordion Style */
-        .review-section { background: #1e293b; color: white; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
-        .review-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-        .review-content { display: none; padding: 15px; background: white; color: #333; }
-        .review-item { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .review-item b { color: var(--primary); display: block; }
+        .event-card { background: white; padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .event-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 10px; }
+        .pb-display { color: #166534; font-weight: bold; font-size: 0.9rem; background: #dcfce7; padding: 4px 10px; border-radius: 20px; }
+        .btn-delete-profile { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; }
 
-        .player-card { background: white; padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .athlete-header { font-size: 1.4rem; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px; }
-        .sport-section { margin-top: 25px; border: 1px solid #f1f5f9; padding: 10px; border-radius: 12px; }
-        .pb-badge { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; }
-        canvas { margin: 15px 0; }
+        .rev-accordion { background: #1e293b; color: white; border-radius: 12px; margin-top: 40px; overflow: hidden; }
+        .rev-trigger { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: bold; }
+        .rev-content { display: none; padding: 20px; background: white; color: #333; }
+        .star-rating { display: flex; gap: 5px; margin: 10px 0; font-size: 25px; color: #fbbf24; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="review-section">
-        <div class="review-header" onclick="toggleReviews()">
-            <span>💬 Coach & User Reviews</span>
-            <span id="arrow">▼</span>
-        </div>
-        <div class="review-content" id="reviewContent">
-            <input type="text" id="revName" placeholder="Your Name/Coach Name">
-            <textarea id="revText" placeholder="Write your review about this app..."></textarea>
-            <button class="btn-save" onclick="saveReview()">Post Review</button>
-            <hr>
-            <div id="reviewList">Loading reviews...</div>
-        </div>
-    </div>
-
-    <div class="card">
+    <div class="main-card">
         <h2>🏅 Performance Entry</h2>
         <input type="text" id="pName" placeholder="Athlete Name">
         <select id="sName">
-            <option value="100m Sprint">100m Sprint</option>
-            <option value="200m Sprint">200m Sprint</option>
-            <option value="Long Jump">Long Jump</option>
-            <option value="Javelin">Javelin</option>
+            <option value="">-- Select Event Category --</option>
+            <optgroup label="Track">
+                <option>100m Sprint</option><option>200m Sprint</option><option>400m Run</option><option>800m Run</option><option>1500m Run</option>
+            </optgroup>
+            <optgroup label="Field">
+                <option>Long Jump</option><option>High Jump</option><option>Shot Put</option><option>Javelin Throw</option><option>Discus Throw</option>
+            </optgroup>
         </select>
         <input type="date" id="pDate">
-        <input type="number" step="0.01" id="pScore" placeholder="Score">
+        <input type="number" step="0.01" id="pScore" placeholder="Score (Time or Dist)">
         <button class="btn-save" onclick="saveData()">SAVE RECORD</button>
     </div>
 
     <div id="displayArea"></div>
+
+    <div class="rev-accordion">
+        <div class="rev-trigger" onclick="toggleRev()">
+            <span>💬 Review & Feedback</span><span id="revArrow">▼</span>
+        </div>
+        <div class="rev-content" id="revBox">
+            <input type="text" id="revName" placeholder="Your Name">
+            <select id="revRole"><option>Coach</option><option>Student</option></select>
+            <div class="star-rating" id="starContainer">
+                <span onclick="setStar(1)">☆</span><span onclick="setStar(2)">☆</span><span onclick="setStar(3)">☆</span><span onclick="setStar(4)">☆</span><span onclick="setStar(5)">☆</span>
+            </div>
+            <textarea id="revMsg" placeholder="Review..."></textarea>
+            <button class="btn-save" onclick="saveReview()">SUBMIT</button>
+            <div id="reviewOutput" style="margin-top:15px; color:#555;"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -70,77 +72,105 @@
         projectId: "athletetracker-5efd6",
         databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    
+    let selectedStars = 0;
 
-    // --- ACCORDION TOGGLE ---
-    function toggleReviews() {
-        const content = document.getElementById('reviewContent');
-        const arrow = document.getElementById('arrow');
-        if(content.style.display === "block") {
-            content.style.display = "none";
-            arrow.innerText = "▼";
-        } else {
-            content.style.display = "block";
-            arrow.innerText = "▲";
-        }
+    function setStar(n) {
+        selectedStars = n;
+        const stars = document.getElementById('starContainer').children;
+        for(let i=0; i<5; i++) stars[i].innerText = i < n ? "★" : "☆";
     }
 
-    // --- SAVE PUBLIC REVIEW ---
-    function saveReview() {
-        const name = document.getElementById('revName').value.trim();
-        const text = document.getElementById('revText').value.trim();
-        if(!name || !text) return alert("Naam aur Review dono likho!");
-
-        database.ref('public_reviews').push({ name, text, date: new Date().toLocaleDateString() });
-        document.getElementById('revText').value = '';
+    function toggleRev() {
+        const b = document.getElementById('revBox');
+        b.style.display = b.style.display === "block" ? "none" : "block";
+        document.getElementById('revArrow').innerText = b.style.display === "block" ? "▲" : "▼";
     }
 
-    // --- LOAD REVIEWS ---
-    database.ref('public_reviews').on('value', (snap) => {
-        const list = document.getElementById('reviewList');
-        list.innerHTML = '';
-        const data = snap.val();
-        for(let id in data) {
-            list.innerHTML += `<div class="review-item"><b>${data[id].name}</b> ${data[id].text}</div>`;
-        }
-    });
-
-    // --- ATHLETE DATA LOGIC (Same as before) ---
+    // Direct Save - No alerts
     function saveData() {
-        const name = document.getElementById('pName').value.trim();
-        const sport = document.getElementById('sName').value;
-        const date = document.getElementById('pDate').value;
-        const score = parseFloat(document.getElementById('pScore').value);
-        if(!name || !date || isNaN(score)) return alert("Details bharo!");
-        database.ref('athletes/' + name + '/' + sport.replace(/\s/g, '')).push({ date, score });
+        const n = document.getElementById('pName').value.trim();
+        const s = document.getElementById('sName').value;
+        const d = document.getElementById('pDate').value;
+        const sc = parseFloat(document.getElementById('pScore').value);
+        if(!n || !s || !d || isNaN(sc)) return;
+
+        database.ref(`athletes/${n}/${s.replace(/\s/g, '')}`).push({ date: d, score: sc });
         document.getElementById('pScore').value = '';
     }
 
-    database.ref('athletes').on('value', (snap) => {
-        renderUI(snap.val());
-    });
-
-    function renderUI(db) {
-        const area = document.getElementById('displayArea');
-        area.innerHTML = '';
-        if(!db) return;
-        for (let player in db) {
-            const card = document.createElement('div');
-            card.className = 'player-card';
-            let html = `<div class="athlete-header">👤 ${player}</div>`;
-            for (let sport in db[player]) {
-                const records = Object.values(db[player][sport]);
-                const scores = records.map(r => r.score);
-                const pb = Math.max(...scores); // Simple PB
-                html += `<div class="sport-section"><b>⚡ ${sport}</b> <span class="pb-badge">PB: ${pb}</span><canvas id="chart-${player.replace(/\s/g,'')}-${sport}"></canvas></div>`;
-            }
-            card.innerHTML = html;
-            area.appendChild(card);
-            // Render charts here (logic simplified for speed)
+    function deleteProfile(athlete, sport) {
+        if(confirm(`Delete ${sport} profile for ${athlete}?`)) {
+            database.ref(`athletes/${athlete}/${sport}`).remove();
         }
     }
+
+    function saveReview() {
+        const n = document.getElementById('revName').value;
+        const r = document.getElementById('revRole').value;
+        const m = document.getElementById('revMsg').value;
+        if(n && m && selectedStars) {
+            database.ref('app_reviews').push({ name: n, role: r, stars: selectedStars, msg: m });
+            document.getElementById('revMsg').value = '';
+            setStar(0);
+        }
+    }
+
+    database.ref('athletes').on('value', snap => {
+        const area = document.getElementById('displayArea');
+        area.innerHTML = '';
+        const data = snap.val();
+        if(!data) return;
+
+        for(let athlete in data) {
+            for(let sportKey in data[athlete]) {
+                const records = Object.values(data[athlete][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
+                const scores = records.map(r => r.score);
+                
+                // PB Logic: Smallest for Sprints, Highest for Throws/Jumps
+                const isTime = /sprint|run|hurdle/i.test(sportKey);
+                const pb = isTime ? Math.min(...scores) : Math.max(...scores);
+                const unit = isTime ? "s" : "m";
+
+                const cardId = `chart-${athlete.replace(/\s/g,'')}-${sportKey}`;
+                area.innerHTML += `
+                    <div class="event-card">
+                        <div class="event-header">
+                            <div><strong>👤 ${athlete}</strong><br><small>⚡ ${sportKey}</small></div>
+                            <div style="text-align:right;">
+                                <div class="pb-display">🏆 PB: ${pb}${unit}</div>
+                                <button class="btn-delete-profile" onclick="deleteProfile('${athlete}', '${sportKey}')">🗑️</button>
+                            </div>
+                        </div>
+                        <canvas id="${cardId}"></canvas>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    new Chart(document.getElementById(cardId), {
+                        type: 'line',
+                        data: {
+                            labels: records.map(r => r.date),
+                            datasets: [{ label: 'Score', data: scores, borderColor: '#2563eb', fill: false, tension: 0.3 }]
+                        },
+                        options: { plugins: { legend: { display: false } } }
+                    });
+                }, 100);
+            }
+        }
+    });
+
+    database.ref('app_reviews').on('value', snap => {
+        const out = document.getElementById('reviewOutput');
+        out.innerHTML = '<b>Recent Reviews:</b>';
+        snap.forEach(c => {
+            const r = c.val();
+            out.innerHTML += `<div style="border-bottom:1px solid #eee; padding:5px 0;">
+                <b>${r.name}</b> (${"★".repeat(r.stars)})<br>${r.msg}</div>`;
+        });
+    });
 </script>
 </body>
 </html>
