@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Elite Tracker</title>
+    <title>Pro Athlete Tracker</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,15 +12,15 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: auto; }
         
+        /* Input Card */
         .main-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
         .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* Athlete Main Profile Card */
-        .athlete-profile { background: white; padding: 20px; border-radius: 20px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        /* Athlete Profile */
+        .athlete-profile { background: white; padding: 20px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .profile-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); margin-bottom: 15px; border-bottom: 3px solid var(--primary); display: inline-block; }
         
-        /* PB Summary Section */
         .pb-summary { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .pb-item { font-size: 0.85rem; background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; }
         .pb-item b { color: var(--primary); }
@@ -28,6 +28,7 @@
         .graph-container { margin-top: 25px; padding-top: 15px; border-top: 1px dotted #ccc; }
         .graph-title { font-size: 1rem; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
         
+        /* Review Pop-up Style Accordion */
         .rev-accordion { background: var(--dark); color: white; border-radius: 12px; margin-top: 40px; overflow: hidden; }
         .rev-trigger { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: bold; }
         .rev-content { display: none; padding: 20px; background: white; color: #333; }
@@ -38,16 +39,30 @@
 
 <div class="container">
     <div class="main-card">
-        <h2 style="margin:0 0 15px 0;">🏅 Data Entry</h2>
+        <h2 style="margin:0 0 15px 0;">🏅 Athlete Entry</h2>
         <input type="text" id="pName" placeholder="Athlete Name">
         <select id="sName">
-            <option value="">-- Event Category --</option>
-            <option>100m Sprint</option><option>200m Sprint</option><option>400m Run</option>
-            <option>Long Jump</option><option>High Jump</option><option>Shot Put</option>
-            <option>Javelin Throw</option><option>Discus Throw</option>
+            <option value="">-- Select Event (22 Categories) --</option>
+            <optgroup label="Sprints & Running">
+                <option>100m</option><option>200m</option><option>400m</option><option>800m</option>
+                <option>1500m</option><option>3000m</option><option>5000m</option><option>10000m</option>
+            </optgroup>
+            <optgroup label="Hurdles & Relays">
+                <option>110m Hurdles</option><option>400m Hurdles</option>
+                <option>4x100m Relay</option><option>4x400m Relay</option>
+            </optgroup>
+            <optgroup label="Jumps">
+                <option>Long Jump</option><option>High Jump</option><option>Triple Jump</option><option>Pole Vault</option>
+            </optgroup>
+            <optgroup label="Throws">
+                <option>Shot Put</option><option>Javelin Throw</option><option>Discus Throw</option><option>Hammer Throw</option>
+            </optgroup>
+            <optgroup label="Combined">
+                <option>Decathlon</option><option>Heptathlon</option>
+            </optgroup>
         </select>
         <input type="date" id="pDate">
-        <input type="number" step="0.01" id="pScore" placeholder="Score">
+        <input type="number" step="0.01" id="pScore" placeholder="Score (Seconds or Meters)">
         <button class="btn-save" onclick="saveData()">SAVE RECORD</button>
     </div>
 
@@ -55,22 +70,23 @@
 
     <div class="rev-accordion">
         <div class="rev-trigger" onclick="toggleRev()">
-            <span>💬 Coach & Student Reviews</span><span id="revArrow">▼</span>
+            <span>💬 Review System (Coach/Student)</span><span id="revArrow">▼</span>
         </div>
         <div class="rev-content" id="revBox">
             <input type="text" id="revName" placeholder="Your Name">
-            <select id="revRole"><option>Coach</option><option>Student</option></select>
+            <select id="revRole"><option>Coach Review</option><option>Student Feedback</option></select>
             <div class="star-rating" id="starContainer">
                 <span onclick="setStar(1)">☆</span><span onclick="setStar(2)">☆</span><span onclick="setStar(3)">☆</span><span onclick="setStar(4)">☆</span><span onclick="setStar(5)">☆</span>
             </div>
-            <textarea id="revMsg" placeholder="Feedback..."></textarea>
-            <button class="btn-save" onclick="saveReview()">SUBMIT</button>
-            <div id="reviewOutput" style="margin-top:20px; font-size:14px;"></div>
+            <textarea id="revMsg" placeholder="Write your review here..."></textarea>
+            <button class="btn-save" onclick="saveReview()">SUBMIT REVIEW</button>
+            <div id="reviewOutput" style="margin-top:20px;"></div>
         </div>
     </div>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
         authDomain: "athletetracker-5efd6.firebaseapp.com",
@@ -105,9 +121,7 @@
     }
 
     function deleteSport(athlete, sport) {
-        if(confirm(`Delete ${sport} from ${athlete}'s profile?`)) {
-            database.ref(`athletes/${athlete}/${sport}`).remove();
-        }
+        if(confirm(`Delete ${sport} data?`)) database.ref(`athletes/${athlete}/${sport}`).remove();
     }
 
     function saveReview() {
@@ -130,62 +144,46 @@
         for(let athlete in data) {
             const profileCard = document.createElement('div');
             profileCard.className = 'athlete-profile';
-            
             let pbHtml = `<div class="pb-summary">`;
             let graphHtml = ``;
             
             for(let sport in data[athlete]) {
                 const records = Object.values(data[athlete][sport]).sort((a,b) => new Date(a.date) - new Date(b.date));
                 const scores = records.map(r => r.score);
-                const isTime = /sprint|run|hurdle/i.test(sport);
+                const isTime = /m$|hurdle|relay/i.test(sport) && !/jump|put|throw/i.test(sport);
                 const pb = isTime ? Math.min(...scores) : Math.max(...scores);
                 const unit = isTime ? "s" : "m";
                 
                 pbHtml += `<div class="pb-item"><b>${sport}:</b> ${pb}${unit}</div>`;
-                
                 const canvasId = `ch-${athlete.replace(/\s/g,'')}-${sport}`;
                 graphHtml += `
                     <div class="graph-container">
-                        <div class="graph-title">
-                            <span>📈 ${sport}</span>
-                            <button onclick="deleteSport('${athlete}', '${sport}')" style="background:none; border:none; color:red; cursor:pointer;">🗑️</button>
-                        </div>
+                        <div class="graph-title"><span>📈 ${sport}</span>
+                        <button onclick="deleteSport('${athlete}', '${sport}')" style="background:none; border:none; color:red; cursor:pointer;">🗑️</button></div>
                         <canvas id="${canvasId}"></canvas>
                     </div>`;
             }
-            pbHtml += `</div>`;
-            
-            profileCard.innerHTML = `<div class="profile-name">👤 ${athlete}</div>
-                                     <h4 style="margin:0 0 10px 0;">Personal Bests Summary:</h4>
-                                     ${pbHtml} ${graphHtml}`;
+            profileCard.innerHTML = `<div class="profile-name">👤 ${athlete}</div><h4 style="margin:0 0 10px 0;">Personal Bests:</h4>${pbHtml}</div>${graphHtml}`;
             area.appendChild(profileCard);
 
-            // Re-render Charts
             for(let sport in data[athlete]) {
                 const records = Object.values(data[athlete][sport]).sort((a,b) => new Date(a.date) - new Date(b.date));
-                const canvasId = `ch-${athlete.replace(/\s/g,'')}-${sport}`;
-                const ctx = document.getElementById(canvasId);
-                if(ctx) {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: records.map(r => r.date),
-                            datasets: [{ data: records.map(r => r.score), borderColor: '#2563eb', tension: 0.3, fill: false }]
-                        },
-                        options: { plugins: { legend: { display: false } } }
-                    });
-                }
+                const ctx = document.getElementById(`ch-${athlete.replace(/\s/g,'')}-${sport}`);
+                if(ctx) new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: records.map(r => r.date), datasets: [{ data: records.map(r => r.score), borderColor: '#2563eb', fill: false, tension: 0.3 }] },
+                    options: { plugins: { legend: { display: false } } }
+                });
             }
         }
     });
 
     database.ref('app_reviews').on('value', snap => {
         const out = document.getElementById('reviewOutput');
-        out.innerHTML = '<b>Community Feedback:</b>';
+        out.innerHTML = '<b>Latest Reviews:</b>';
         snap.forEach(c => {
             const r = c.val();
-            out.innerHTML += `<div style="border-bottom:1px solid #eee; padding:8px 0;">
-                <b>${r.name}</b> (${"★".repeat(r.stars)})<br><small>${r.msg}</small></div>`;
+            out.innerHTML += `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name} (${r.role})</b><br>${"★".repeat(r.stars)}<br>${r.msg}</div>`;
         });
     });
 </script>
