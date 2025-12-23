@@ -1,109 +1,172 @@
-// --- YOUR FIREBASE CONFIG ---
-const firebaseConfig = {
-    apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
-    authDomain: "athletetracker-5efd6.firebaseapp.com",
-    projectId: "athletetracker-5efd6",
-    storageBucket: "athletetracker-5efd6.firebasestorage.app",
-    messagingSenderId: "79516207784",
-    appId: "1:79516207784:web:30fa59ccbf9e9a5eeb109d",
-    measurementId: "G-YLH1Y2MKKF",
-    databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com"
-};
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athlete Tracker Pro</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #2563eb; --danger: #ef4444; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: auto; }
+        
+        /* Input Card */
+        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin: 0 0 15px 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-save:active { opacity: 0.8; }
 
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+        /* Display Cards */
+        .player-card { background: white; padding: 15px; border-radius: 16px; margin-bottom: 20px; position: relative; }
+        .athlete-name { font-size: 1.4rem; font-weight: bold; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px; }
+        
+        .sport-box { margin-top: 20px; padding: 10px; border-radius: 12px; background: #fafafa; }
+        .sport-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        .pb-badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .btn-del { background: #fee2e2; border: none; color: var(--danger); padding: 6px; border-radius: 8px; cursor: pointer; }
 
-// 1. Direct Save (No Alerts)
-function saveData() {
-    const name = document.getElementById('pName').value.trim();
-    const sport = document.getElementById('sName').value;
-    const date = document.getElementById('pDate').value;
-    const score = parseFloat(document.getElementById('pScore').value);
-    
-    if(!name || !date || isNaN(score)) return alert("Details bharo!");
+        canvas { width: 100% !important; height: auto !important; margin-top: 10px; }
+    </style>
+</head>
+<body>
 
-    // alert() hata diya gaya hai taaki direct save ho
-    database.ref('athletes/' + name + '/' + sport.replace(/\s/g, '')).push({
-        date: date,
-        score: score
+<div class="container">
+    <div class="card">
+        <h2>🚀 New Entry</h2>
+        <input type="text" id="pName" placeholder="Athlete Name">
+        <select id="sName">
+            <option value="100m Sprint">100m Sprint</option>
+            <option value="200m Sprint">200m Sprint</option>
+            <option value="400m Run">400m Run</option>
+            <option value="800m Run">800m Run</option>
+            <option value="Long Jump">Long Jump</option>
+            <option value="High Jump">High Jump</option>
+            <option value="Shot Put">Shot Put</option>
+            <option value="Javelin">Javelin</option>
+            <option value="Discus Throw">Discus Throw</option>
+        </select>
+        <input type="date" id="pDate">
+        <input type="number" step="0.01" id="pScore" placeholder="Score (Time/Dist)">
+        <button class="btn-save" onclick="saveData()">SAVE RECORD</button>
+    </div>
+
+    <div id="displayArea"></div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG (SAME AS YOURS) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
+        authDomain: "athletetracker-5efd6.firebaseapp.com",
+        projectId: "athletetracker-5efd6",
+        databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let allCharts = {};
+
+    // 1. Save Data (Direct - No annoying alerts)
+    function saveData() {
+        const name = document.getElementById('pName').value.trim();
+        const sport = document.getElementById('sName').value;
+        const date = document.getElementById('pDate').value;
+        const score = parseFloat(document.getElementById('pScore').value);
+        
+        if(!name || !date || isNaN(score)) return alert("Details bharo!");
+
+        database.ref('athletes/' + name + '/' + sport.replace(/\s/g, '')).push({
+            date: date,
+            score: score
+        });
+        
+        // Clear score input to show success
+        document.getElementById('pScore').value = '';
+    }
+
+    // 2. Delete Sport for a Player
+    function deleteRecord(playerName, sportKey) {
+        if(confirm(`${playerName} ka ${sportKey} data delete karein?`)) {
+            database.ref('athletes/' + playerName + '/' + sportKey).remove();
+        }
+    }
+
+    // 3. Realtime Listener
+    database.ref('athletes').on('value', (snap) => {
+        const data = snap.val();
+        renderUI(data);
     });
-    
-    // Input field clear kar dena taaki pata chale save ho gaya
-    document.getElementById('pScore').value = '';
-}
 
-// 2. Delete Functionality
-function deleteSportRecord(playerName, sportKey) {
-    if(confirm(`${playerName} ka ${sportKey} data delete karein?`)) {
-        database.ref('athletes/' + playerName + '/' + sportKey).remove();
-    }
-}
+    function renderUI(db) {
+        const area = document.getElementById('displayArea');
+        area.innerHTML = '';
+        if(!db) return;
 
-database.ref('athletes').on('value', (snapshot) => {
-    const data = snapshot.val();
-    renderAthletes(data);
-});
+        for (let player in db) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            let html = `<div class="athlete-name">👤 ${player}</div>`;
 
-function renderAthletes(db) {
-    const area = document.getElementById('displayArea');
-    area.innerHTML = '';
-    if(!db) return;
+            for (let sportKey in db[player]) {
+                const records = Object.values(db[player][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
+                const scores = records.map(r => r.score);
+                const isTime = /sprint|run|hurdle/i.test(sportKey);
+                const pb = isTime ? Math.min(...scores) : Math.max(...scores);
+                const unit = isTime ? "s" : "m";
+                const canvasId = `chart-${player.replace(/\s/g, '')}-${sportKey}`;
 
-    for (let player in db) {
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        let html = `<h2>👤 ${player}</h2>`;
-
-        for (let sportKey in db[player]) {
-            const records = Object.values(db[player][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const scores = records.map(r => r.score);
-            
-            const isTimeEvent = sportKey.toLowerCase().includes("sprint") || 
-                              sportKey.toLowerCase().includes("run") || 
-                              sportKey.toLowerCase().includes("hurdles");
-            
-            const pb = isTimeEvent ? Math.min(...scores) : Math.max(...scores);
-            const unit = isTimeEvent ? "s" : "m";
-
-            html += `
-                <div style="margin-top:20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong>🔥 ${sportKey}</strong>
-                        <div>
-                            <span class="pb-badge">🏆 PB: ${pb}${unit}</span>
-                            <button onclick="deleteSportRecord('${player}', '${sportKey}')" 
-                                    style="background:none; border:none; color:red; cursor:pointer; font-size:18px; margin-left:10px;">
-                                🗑️
-                            </button>
+                html += `
+                    <div class="sport-box">
+                        <div class="sport-header">
+                            <strong>${sportKey}</strong>
+                            <div>
+                                <span class="pb-badge">PB: ${pb}${unit}</span>
+                                <button class="btn-del" onclick="deleteRecord('${player}', '${sportKey}')">🗑️</button>
+                            </div>
                         </div>
+                        <canvas id="${canvasId}"></canvas>
                     </div>
-                    <canvas id="chart-${player.replace(/\s/g, '')}-${sportKey}"></canvas>
-                </div>
-            `;
-        }
-        card.innerHTML = html;
-        area.appendChild(card);
+                `;
+            }
+            card.innerHTML = html;
+            area.appendChild(card);
 
-        // Render Charts
-        for (let sportKey in db[player]) {
-            const records = Object.values(db[player][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const canvasId = `chart-${player.replace(/\s/g, '')}-${sportKey}`;
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: records.map(r => r.date),
-                    datasets: [{ 
-                        label: 'Performance', 
-                        data: records.map(r => r.score), 
-                        borderColor: '#2563eb', 
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true,
-                        tension: 0.3 
-                    }]
-                },
-                options: { plugins: { legend: { display: false } } }
-            });
+            // Create Charts
+            for (let sportKey in db[player]) {
+                const records = Object.values(db[player][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
+                const canvasId = `chart-${player.replace(/\s/g, '')}-${sportKey}`;
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                
+                if(allCharts[canvasId]) allCharts[canvasId].destroy();
+
+                allCharts[canvasId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: records.map(r => r.date),
+                        datasets: [{ 
+                            data: records.map(r => r.score), 
+                            borderColor: '#2563eb', 
+                            backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: { 
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
         }
     }
-}
+</script>
+</body>
+</html>
