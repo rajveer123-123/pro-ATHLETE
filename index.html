@@ -25,12 +25,10 @@
         .pb-box span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
         .pb-box div { font-size: 1rem; color: var(--primary); font-weight: 800; }
 
-        /* Horizontal Scroll Logic */
         .scroll-container { display: none; overflow-x: auto; white-space: nowrap; padding: 10px 0; scroll-snap-type: x mandatory; gap: 15px; }
         .graph-box { display: inline-block; min-width: 300px; width: 90%; background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-right: 15px; scroll-snap-align: center; vertical-align: top; }
         .drawer-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; }
 
-        /* Review Dropdown CSS */
         .rev-card { background: var(--dark); color: white; padding: 20px; border-radius: 24px; margin-top: 40px; }
         .rev-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .rev-content { display: none; margin-top: 15px; transition: 0.3s; }
@@ -45,10 +43,42 @@
         <input type="text" id="pName" placeholder="Athlete Name">
         <select id="sEvent">
             <option value="">-- Select Event --</option>
-            <optgroup label="Sprints"><option>100m</option><option>200m</option><option>400m</option></optgroup>
-            <optgroup label="Distance"><option>800m</option><option>1500m</option><option>5000m</option></optgroup>
-            <optgroup label="Jumps"><option>Long Jump</option><option>High Jump</option><option>Triple Jump</option></optgroup>
-            <optgroup label="Throws"><option>Javelin Throw</option><option>Shot Put</option><option>Discus Throw</option></optgroup>
+            <optgroup label="Sprints">
+                <option>100m</option>
+                <option>200m</option>
+                <option>400m</option>
+            </optgroup>
+            <optgroup label="Middle/Long Distance">
+                <option>800m</option>
+                <option>1500m</option>
+                <option>3000m Steeplechase</option>
+                <option>5000m</option>
+                <option>10000m</option>
+            </optgroup>
+            <optgroup label="Hurdles">
+                <option>100m/110m Hurdles</option>
+                <option>400m Hurdles</option>
+            </optgroup>
+            <optgroup label="Relays">
+                <option>4x100m Relay</option>
+                <option>4x400m Relay</option>
+            </optgroup>
+            <optgroup label="Jumps">
+                <option>Long Jump</option>
+                <option>High Jump</option>
+                <option>Triple Jump</option>
+                <option>Pole Vault</option>
+            </optgroup>
+            <optgroup label="Throws">
+                <option>Shot Put</option>
+                <option>Discus Throw</option>
+                <option>Javelin Throw</option>
+                <option>Hammer Throw</option>
+            </optgroup>
+            <optgroup label="Combined/Other">
+                <option>Decathlon/Heptathlon</option>
+                <option>20km Race Walk</option>
+            </optgroup>
         </select>
         <input type="date" id="pDate">
         <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meters)">
@@ -90,7 +120,6 @@
     let chartStorage = {};
     let starRating = 0;
 
-    // Review Dropdown Logic
     function toggleReviews() {
         const content = document.getElementById('revContent');
         const arrow = document.getElementById('revArrow');
@@ -182,7 +211,6 @@
         }
     });
 
-    // Review Logic
     function setStar(n) { starRating = n; const s = document.getElementById('starBox').children; for(let i=0;i<5;i++) s[i].innerText = i<n?'★':'☆'; }
     function saveReview() {
         const u = document.getElementById('revUser').value; const r = document.getElementById('revRole').value; const m = document.getElementById('revMsg').value;
