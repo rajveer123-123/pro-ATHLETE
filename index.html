@@ -3,78 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Athlete Tracker - Dynamic Colors</title>
+    <title>Elite Athlete Tracker Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --dark: #0f172a; --bg: #f8fafc; --green: #22c55e; --red: #ef4444; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--dark); }
-        .container { max-width: 600px; margin: auto; }
+        :root { --primary: #2563eb; --dark: #0f172a; --bg: #f1f5f9; --red: #ef4444; --green: #22c55e; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 800px; margin: auto; }
         
-        .main-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--primary); outline: none; ring: 2px var(--primary); }
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .main-card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        .athlete-profile { background: white; padding: 25px; border-radius: 24px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .profile-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); margin-bottom: 15px; border-left: 5px solid var(--primary); padding-left: 15px; }
-        
-        .pb-summary { background: #f1f5f9; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .pb-item { font-size: 0.9rem; background: white; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .pb-item b { color: var(--primary); }
+        .athlete-card { background: white; padding: 20px; border-radius: 24px; margin-bottom: 20px; position: relative; border: 1px solid #eef2f6; }
+        .del-athlete { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.2rem; }
+        .athlete-name { font-size: 1.6rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; border-left: 5px solid var(--primary); padding-left: 12px; }
 
-        .graph-container { margin-top: 25px; padding: 15px; background: #fff; border: 1px solid #f1f5f9; border-radius: 15px; }
-        .graph-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .rev-accordion { background: var(--dark); color: white; border-radius: 15px; margin-top: 40px; overflow: hidden; }
-        .rev-trigger { padding: 18px; cursor: pointer; display: flex; justify-content: space-between; font-weight: bold; }
-        .rev-content { display: none; padding: 20px; background: white; color: #333; }
-        .star-rating { display: flex; gap: 8px; margin: 10px 0; font-size: 28px; color: #fbbf24; cursor: pointer; }
+        .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .pb-box { background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        .pb-box span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .pb-box div { font-size: 1rem; color: var(--primary); font-weight: 800; }
+
+        /* Horizontal Scroll Logic */
+        .scroll-container { display: none; overflow-x: auto; white-space: nowrap; padding: 10px 0; scroll-snap-type: x mandatory; gap: 15px; }
+        .graph-box { display: inline-block; min-width: 300px; width: 90%; background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-right: 15px; scroll-snap-align: center; vertical-align: top; }
+        .drawer-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+
+        .rev-card { background: var(--dark); color: white; padding: 25px; border-radius: 24px; margin-top: 40px; }
+        .stars { color: #fbbf24; font-size: 30px; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="main-card">
-        <h2 style="margin:0 0 15px 0;">🏅 Athlete Entry</h2>
+        <h2>🏅 Performance Hub</h2>
         <input type="text" id="pName" placeholder="Athlete Name">
-        <select id="sName">
+        <select id="sEvent">
             <option value="">-- Select Event --</option>
-            <optgroup label="Sprints & Running">
-                <option>100m</option><option>200m</option><option>400m</option><option>800m</option>
-                <option>1500m</option><option>5000m</option>
-            </optgroup>
-            <optgroup label="Hurdles & Relays">
-                <option>110m Hurdles</option><option>400m Hurdles</option>
-                <option>4x100m Relay</option>
-            </optgroup>
-            <optgroup label="Field Events">
-                <option>Long Jump</option><option>High Jump</option>
-                <option>Shot Put</option><option>Javelin Throw</option>
-            </optgroup>
+            <optgroup label="Sprints"><option>100m</option><option>200m</option><option>400m</option></optgroup>
+            <optgroup label="Distance"><option>800m</option><option>1500m</option><option>5000m</option></optgroup>
+            <optgroup label="Jumps"><option>Long Jump</option><option>High Jump</option><option>Triple Jump</option></optgroup>
+            <optgroup label="Throws"><option>Javelin Throw</option><option>Shot Put</option><option>Discus Throw</option></optgroup>
         </select>
         <input type="date" id="pDate">
-        <input type="number" step="0.01" id="pScore" placeholder="Score (Seconds or Meters)">
-        <button class="btn-save" onclick="saveData()">SAVE RECORD</button>
+        <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meters)">
+        <button class="btn-save" onclick="saveData()">SAVE PERFORMANCE</button>
     </div>
 
     <div id="displayArea"></div>
 
-    <div class="rev-accordion">
-        <div class="rev-trigger" onclick="toggleRev()">
-            <span>💬 Review System</span><span id="revArrow">▼</span>
+    <div class="rev-card">
+        <h3>💬 Reviews <span id="revCount" style="background:#fbbf24; color:#000; padding:2px 8px; border-radius:10px; font-size:12px;">0</span></h3>
+        <input type="text" id="revUser" placeholder="Your Name">
+        <select id="revRole"><option>Coach</option><option>Student</option><option>Viewer</option></select>
+        <div class="stars" id="starBox">
+            <span onclick="setStar(1)">☆</span><span onclick="setStar(2)">☆</span><span onclick="setStar(3)">☆</span><span onclick="setStar(4)">☆</span><span onclick="setStar(5)">☆</span>
         </div>
-        <div class="rev-content" id="revBox">
-            <input type="text" id="revName" placeholder="Your Name">
-            <select id="revRole"><option>Coach Review</option><option>Student Feedback</option></select>
-            <div class="star-rating" id="starContainer">
-                <span onclick="setStar(1)">☆</span><span onclick="setStar(2)">☆</span><span onclick="setStar(3)">☆</span><span onclick="setStar(4)">☆</span><span onclick="setStar(5)">☆</span>
-            </div>
-            <textarea id="revMsg" placeholder="Write your review here..."></textarea>
-            <button class="btn-save" onclick="saveReview()">SUBMIT REVIEW</button>
-            <div id="reviewOutput" style="margin-top:20px;"></div>
-        </div>
+        <textarea id="revMsg" style="width:100%; border-radius:10px; padding:10px;" placeholder="Write feedback..."></textarea>
+        <button class="btn-save" style="background:#fbbf24; color:#000; margin-top:10px;" onclick="saveReview()">SUBMIT REVIEW</button>
+        <div id="reviewList" style="margin-top:20px;"></div>
     </div>
 </div>
 
@@ -86,97 +75,107 @@
         databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com"
     };
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    
-    let chartInstances = {};
+    const db = firebase.database();
+
+    let chartStorage = {};
+    let starRating = 0;
 
     function saveData() {
         const n = document.getElementById('pName').value.trim();
-        const s = document.getElementById('sName').value;
+        const e = document.getElementById('sEvent').value;
         const d = document.getElementById('pDate').value;
-        const sc = parseFloat(document.getElementById('pScore').value);
-        if(!n || !s || !d || isNaN(sc)) return;
-        
-        const sportKey = s.replace(/[^a-zA-Z0-9]/g, '');
-        database.ref(`athletes/${n}/${sportKey}`).push({ date: d, score: sc, originalName: s });
+        const s = parseFloat(document.getElementById('pScore').value);
+        if(!n || !e || !d || isNaN(s)) return alert("Fill all fields");
+
+        const eKey = e.replace(/[^a-zA-Z0-9]/g, '');
+        db.ref(`athletes/${n}/${eKey}`).push({ date: d, score: s, eventName: e });
         document.getElementById('pScore').value = '';
     }
 
-    function deleteSport(athlete, sportKey) {
-        if(confirm(`Delete data?`)) database.ref(`athletes/${athlete}/${sportKey}`).remove();
+    function deleteAthlete(name) { if(confirm(`Delete ${name}?`)) db.ref(`athletes/${name}`).remove(); }
+    function deleteSport(name, key) { if(confirm("Delete this sport?")) db.ref(`athletes/${name}/${key}`).remove(); }
+
+    function toggleScroll(id) {
+        const el = document.getElementById(`scroll-${id}`);
+        el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    database.ref('athletes').on('value', snap => {
+    db.ref('athletes').on('value', snap => {
         const area = document.getElementById('displayArea');
         area.innerHTML = '';
-        Object.values(chartInstances).forEach(c => c.destroy());
-        chartInstances = {};
+        Object.values(chartStorage).forEach(c => c.destroy());
+        chartStorage = {};
 
         const data = snap.val();
         if(!data) return;
 
         for(let athlete in data) {
-            const profileCard = document.createElement('div');
-            profileCard.className = 'athlete-profile';
-            profileCard.innerHTML = `<div class="profile-name">👤 ${athlete}</div><div class="pb-summary"></div><div id="g-${athlete.replace(/\s/g,'')}"></div>`;
-            area.appendChild(profileCard);
+            const sID = athlete.replace(/\s/g, '');
+            const card = document.createElement('div');
+            card.className = 'athlete-card';
+            card.innerHTML = `
+                <button class="del-athlete" onclick="deleteAthlete('${athlete}')">🗑️</button>
+                <div class="athlete-name">👤 ${athlete}</div>
+                <div class="pb-grid" id="pb-g-${sID}"></div>
+                <button class="drawer-btn" onclick="toggleScroll('${sID}')">📊 VIEW ALL GRAPHS (SWIPE LEFT/RIGHT)</button>
+                <div class="scroll-container" id="scroll-${sID}"></div>
+            `;
+            area.appendChild(card);
 
-            const pbSummary = profileCard.querySelector('.pb-summary');
-            const graphBox = document.getElementById(`g-${athlete.replace(/\s/g,'')}`);
+            for(let eKey in data[athlete]) {
+                const logs = Object.values(data[athlete][eKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
+                const scores = logs.map(l => l.score);
+                const evName = logs[0].eventName;
+                const isTime = /m|Relay|Hurdle/i.test(evName) && !/Jump|Throw|Put/i.test(evName);
+                const unit = isTime ? "s" : "m";
+                const pb = isTime ? Math.min(...scores) : Math.max(...scores);
 
-            for(let sportKey in data[athlete]) {
-                const records = Object.values(data[athlete][sportKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
-                const scores = records.map(r => r.score);
-                const name = records[0].originalName || sportKey;
-                const isTimed = /m|Hurdle|Relay/i.test(name) && !/Jump|Throw|Put/i.test(name);
-                const unit = isTimed ? "s" : "m";
-                const pb = isTimed ? Math.min(...scores) : Math.max(...scores);
+                document.getElementById(`pb-g-${sID}`).innerHTML += `<div class="pb-box"><span>${evName}</span><div>${pb}${unit}</div></div>`;
 
-                pbSummary.innerHTML += `<div class="pb-item"><b>${name}:</b> ${pb}${unit}</div>`;
-
-                const canvasId = `c-${athlete.replace(/\s/g,'')}-${sportKey}`;
-                const wrap = document.createElement('div');
-                wrap.className = 'graph-container';
-                wrap.innerHTML = `<div class="graph-title"><span>📈 ${name}</span><button onclick="deleteSport('${athlete}','${sportKey}')" style="color:red;border:none;background:none;cursor:pointer;">🗑️</button></div><canvas id="${canvasId}"></canvas>`;
-                graphBox.appendChild(wrap);
+                const canvasId = `c-${sID}-${eKey}`;
+                const box = document.createElement('div');
+                box.className = 'graph-box';
+                box.innerHTML = `<div style="display:flex; justify-content:space-between"><b>${evName}</b> <button onclick="deleteSport('${athlete}','${eKey}')" style="border:none;background:none;cursor:pointer">❌</button></div><canvas id="${canvasId}"></canvas>`;
+                document.getElementById(`scroll-${sID}`).appendChild(box);
 
                 const ctx = document.getElementById(canvasId).getContext('2d');
-                chartInstances[canvasId] = new Chart(ctx, {
+                chartStorage[canvasId] = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: records.map(r => r.date),
+                        labels: logs.map(l => l.date),
                         datasets: [{
                             data: scores,
-                            segment: {
-                                // THE COLOR LOGIC
-                                borderColor: ctx => {
-                                    const p1 = ctx.p0.parsed.y;
-                                    const p2 = ctx.p1.parsed.y;
-                                    // If timed: Lower is better. If p2 < p1, it's green.
-                                    // If field: Higher is better. If p2 > p1, it's green.
-                                    const improved = isTimed ? p2 < p1 : p2 > p1;
-                                    return improved ? '#22c55e' : '#ef4444';
-                                }
-                            },
-                            borderWidth: 4,
-                            tension: 0.3,
-                            pointRadius: 6,
-                            pointBackgroundColor: '#fff',
-                            pointBorderWidth: 3
+                            segment: { borderColor: ctx => {
+                                const p1 = ctx.p0.parsed.y; const p2 = ctx.p1.parsed.y;
+                                const imp = isTime ? p2 < p1 : p2 > p1;
+                                return imp ? '#22c55e' : '#ef4444';
+                            }},
+                            borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff'
                         }]
                     },
-                    options: {
-                        scales: { y: { reverse: isTimed, beginAtZero: false, ticks: { callback: v => v + unit } } },
-                        plugins: { legend: { display: false } }
-                    }
+                    options: { scales: { y: { reverse: isTime, ticks: { callback: v => v + unit } } }, plugins: { legend: { display: false } } }
                 });
             }
         }
     });
 
-    // Simple review logic
-    function setStar(n) { selectedStars = n; const s = document.getElementById('starContainer').children; for(let i=0; i<5; i++) s[i].innerText = i<n?"★":"☆"; }
-    function toggleRev() { const b = document.getElementById('revBox'); b.style.display = b.style.display==="block"?"none":"block"; }
+    // Review Logic
+    function setStar(n) { starRating = n; const s = document.getElementById('starBox').children; for(let i=0;i<5;i++) s[i].innerText = i<n?'★':'☆'; }
+    function saveReview() {
+        const u = document.getElementById('revUser').value; const r = document.getElementById('revRole').value; const m = document.getElementById('revMsg').value;
+        if(!u || !m || starRating === 0) return alert("Complete review!");
+        db.ref('reviews').push({ user: u, role: r, msg: m, stars: starRating });
+        document.getElementById('revMsg').value = ''; setStar(0);
+    }
+    db.ref('reviews').on('value', snap => {
+        const list = document.getElementById('reviewList'); list.innerHTML = '';
+        const data = snap.val(); if(!data) return;
+        document.getElementById('revCount').innerText = Object.keys(data).length;
+        Object.values(data).reverse().forEach(r => {
+            list.innerHTML += `<div style="background:#1e293b; padding:10px; border-radius:10px; margin-bottom:10px; border-left:3px solid #fbbf24">
+                <b>${r.user} (${r.role})</b> <span style="color:#fbbf24">${"★".repeat(r.stars)}</span><br><small>${r.msg}</small></div>`;
+        });
+    });
 </script>
 </body>
 </html>
