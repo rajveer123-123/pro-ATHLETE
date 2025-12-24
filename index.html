@@ -43,42 +43,13 @@
         <input type="text" id="pName" placeholder="Athlete Name">
         <select id="sEvent">
             <option value="">-- Select Event --</option>
-            <optgroup label="Sprints">
-                <option>100m</option>
-                <option>200m</option>
-                <option>400m</option>
-            </optgroup>
-            <optgroup label="Middle/Long Distance">
-                <option>800m</option>
-                <option>1500m</option>
-                <option>3000m Steeplechase</option>
-                <option>5000m</option>
-                <option>10000m</option>
-            </optgroup>
-            <optgroup label="Hurdles">
-                <option>100m/110m Hurdles</option>
-                <option>400m Hurdles</option>
-            </optgroup>
-            <optgroup label="Relays">
-                <option>4x100m Relay</option>
-                <option>4x400m Relay</option>
-            </optgroup>
-            <optgroup label="Jumps">
-                <option>Long Jump</option>
-                <option>High Jump</option>
-                <option>Triple Jump</option>
-                <option>Pole Vault</option>
-            </optgroup>
-            <optgroup label="Throws">
-                <option>Shot Put</option>
-                <option>Discus Throw</option>
-                <option>Javelin Throw</option>
-                <option>Hammer Throw</option>
-            </optgroup>
-            <optgroup label="Combined/Other">
-                <option>Decathlon/Heptathlon</option>
-                <option>20km Race Walk</option>
-            </optgroup>
+            <optgroup label="Sprints"><option>100m</option><option>200m</option><option>400m</option></optgroup>
+            <optgroup label="Middle/Long Distance"><option>800m</option><option>1500m</option><option>3000m Steeplechase</option><option>5000m</option><option>10000m</option></optgroup>
+            <optgroup label="Hurdles"><option>100m/110m Hurdles</option><option>400m Hurdles</option></optgroup>
+            <optgroup label="Relays"><option>4x100m Relay</option><option>4x400m Relay</option></optgroup>
+            <optgroup label="Jumps"><option>Long Jump</option><option>High Jump</option><option>Triple Jump</option><option>Pole Vault</option></optgroup>
+            <optgroup label="Throws"><option>Shot Put</option><option>Discus Throw</option><option>Javelin Throw</option><option>Hammer Throw</option></optgroup>
+            <optgroup label="Combined/Other"><option>Decathlon/Heptathlon</option><option>20km Race Walk</option></optgroup>
         </select>
         <input type="date" id="pDate">
         <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meters)">
@@ -92,7 +63,6 @@
             <h3 style="margin:0;">💬 Reviews <span id="revCount" style="background:#fbbf24; color:#000; padding:2px 8px; border-radius:10px; font-size:12px;">0</span></h3>
             <span id="revArrow">▼</span>
         </div>
-        
         <div id="revContent" class="rev-content">
             <hr style="border: 0.5px solid #334155; margin-bottom: 15px;">
             <input type="text" id="revUser" placeholder="Your Name">
@@ -108,6 +78,13 @@
 </div>
 
 <script>
+    // --- Unique User Identity ---
+    let userID = localStorage.getItem('athleteTracker_ID');
+    if (!userID) {
+        userID = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('athleteTracker_ID', userID);
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
         authDomain: "athletetracker-5efd6.firebaseapp.com",
@@ -123,13 +100,8 @@
     function toggleReviews() {
         const content = document.getElementById('revContent');
         const arrow = document.getElementById('revArrow');
-        if (content.style.display === "block") {
-            content.style.display = "none";
-            arrow.innerText = "▼";
-        } else {
-            content.style.display = "block";
-            arrow.innerText = "▲";
-        }
+        content.style.display = (content.style.display === "block") ? "none" : "block";
+        arrow.innerText = (content.style.display === "block") ? "▲" : "▼";
     }
 
     function saveData() {
@@ -140,19 +112,20 @@
         if(!n || !e || !d || isNaN(s)) return alert("Fill all fields");
 
         const eKey = e.replace(/[^a-zA-Z0-9]/g, '');
-        db.ref(`athletes/${n}/${eKey}`).push({ date: d, score: s, eventName: e });
+        // Data is now saved under the unique userID
+        db.ref(`${userID}/athletes/${n}/${eKey}`).push({ date: d, score: s, eventName: e });
         document.getElementById('pScore').value = '';
     }
 
-    function deleteAthlete(name) { if(confirm(`Delete ${name}?`)) db.ref(`athletes/${name}`).remove(); }
-    function deleteSport(name, key) { if(confirm("Delete this sport?")) db.ref(`athletes/${name}/${key}`).remove(); }
+    function deleteAthlete(name) { if(confirm(`Delete ${name}?`)) db.ref(`${userID}/athletes/${name}`).remove(); }
+    function deleteSport(name, key) { if(confirm("Delete this sport?")) db.ref(`${userID}/athletes/${name}/${key}`).remove(); }
 
     function toggleScroll(id) {
         const el = document.getElementById(`scroll-${id}`);
         el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    db.ref('athletes').on('value', snap => {
+    db.ref(`${userID}/athletes`).on('value', snap => {
         const area = document.getElementById('displayArea');
         area.innerHTML = '';
         Object.values(chartStorage).forEach(c => c.destroy());
@@ -169,7 +142,7 @@
                 <button class="del-athlete" onclick="deleteAthlete('${athlete}')">🗑️</button>
                 <div class="athlete-name">👤 ${athlete}</div>
                 <div class="pb-grid" id="pb-g-${sID}"></div>
-                <button class="drawer-btn" onclick="toggleScroll('${sID}')">📊 VIEW ALL GRAPHS (SWIPE LEFT/RIGHT)</button>
+                <button class="drawer-btn" onclick="toggleScroll('${sID}')">📊 VIEW ALL GRAPHS</button>
                 <div class="scroll-container" id="scroll-${sID}"></div>
             `;
             area.appendChild(card);
