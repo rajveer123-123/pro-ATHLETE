@@ -3,42 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Lab v16</title>
+    <title>Elite Performance Master v18</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --review: #f59e0b; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
-        
-        /* NAVIGATION */
         .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .nav-btn { flex: 1; padding: 20px 5px; text-align: center; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; }
         .nav-btn.active { color: var(--primary); background: #f0f7ff; border-top: 4px solid var(--primary); }
-
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
         .container.active { display: block; }
-
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
-
-        /* ATHLETE DASHBOARD */
-        .athlete-card { background: white; border-radius: 25px; margin-bottom: 25px; padding: 15px; border-left: 8px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scroll-snap-type: x mandatory; }
-        .scroll-x::-webkit-scrollbar { display: none; }
-        .graph-card { min-width: 300px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; scroll-snap-align: start; }
-        
-        /* AI ADVICE & HISTORY */
-        .ai-advice { background: #eff6ff; border: 1px dashed var(--primary); padding: 10px; border-radius: 12px; margin-top: 10px; font-size: 12px; line-height: 1.4; color: #1e40af; }
-        .history-list { margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; max-height: 120px; overflow-y: auto; }
+        .star-rating { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 35px; color: #cbd5e1; cursor: pointer; }
+        .star-rating span.active { color: #fbbf24; }
+        .rev-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid var(--review); }
+        .ai-advice { background: #eff6ff; border: 1px dashed var(--primary); padding: 10px; border-radius: 12px; margin-top: 10px; font-size: 12px; color: #1e40af; }
         .history-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px dotted #eee; }
-        .del-x { color: #ef4444; font-weight: bold; cursor: pointer; padding-left: 10px; }
-        .pb-tag { float: right; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; }
+        .del-x { color: #ef4444; font-weight: bold; cursor: pointer; }
+        .athlete-card { background: white; border-radius: 25px; margin-bottom: 25px; padding: 15px; border-left: 8px solid var(--primary); }
+        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; }
+        .graph-card { min-width: 300px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; }
     </style>
 </head>
 <body>
-
     <div class="nav">
         <div class="nav-btn active" onclick="showTab('page-practice', this)">PRACTICE</div>
         <div class="nav-btn" onclick="showTab('page-main', this)">MAIN EVENT</div>
@@ -47,41 +38,42 @@
     </div>
 
     <div id="page-practice" class="container active">
-        <h2 style="color: var(--practice)">🏃 Training Drills</h2>
+        <h2 style="color: var(--practice)">🏃 Practice Sessions</h2>
         <div class="card">
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
                 <option>30m Sprint</option><option>80m Sprint</option><option>150m Sprint</option>
-                <option>Broad Jump</option><option>5-Bonded Jumps</option><option>10-Bonded Jumps</option>
+                <option>Broad Jump</option><option>5-Bonded Jumps</option>
             </select>
             <input type="number" step="0.01" id="pScore" placeholder="Result">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
         <div id="practiceArea"></div>
     </div>
 
     <div id="page-main" class="container">
-        <h2 style="color: var(--main)">🏆 Official Events</h2>
+        <h2 style="color: var(--main)">🏆 Main Events</h2>
         <div class="card">
             <input type="text" id="mName" placeholder="Athlete Name">
-            <select id="mEvent">
-                <option>100m Dash</option><option>200m Dash</option><option>Long Jump</option><option>Triple Jump</option>
-            </select>
+            <select id="mEvent"><option>100m Dash</option><option>Long Jump</option></select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
-            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE DATA</button>
+            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE EVENT</button>
         </div>
         <div id="mainArea"></div>
     </div>
 
     <div id="page-review" class="container">
-        <h2 style="color: var(--review)">💬 Review Wall</h2>
-        <div class="card" id="revForm">
+        <h2 style="color: var(--review)">💬 Reviews & Ratings</h2>
+        <div class="card">
             <input type="text" id="revAthlete" placeholder="Athlete Name">
-            <input type="number" id="revStar" placeholder="Rating (1-5)" min="1" max="5">
-            <textarea id="revMsg" placeholder="Review..."></textarea>
-            <button class="btn" style="background: var(--review)" onclick="submitReview()">POST</button>
+            <select id="revRole"><option>Student</option><option>Coach</option><option>Viewer</option></select>
+            <div class="star-rating" id="starInput">
+                <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
+            </div>
+            <textarea id="revMsg" placeholder="Feedback..."></textarea>
+            <button class="btn" style="background: var(--review)" onclick="submitReview()">POST REVIEW</button>
         </div>
         <div id="reviewWall"></div>
     </div>
@@ -92,20 +84,16 @@
     </div>
 
 <script>
-    // Firebase Setup
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let userID = localStorage.getItem('athleteTracker_ID') || 'user_' + Math.random().toString(36).substr(2, 9);
+    let userID = localStorage.getItem('athleteTracker_ID') || 'user_master';
     localStorage.setItem('athleteTracker_ID', userID);
 
-    function showTab(id, btn) {
-        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-        window.scrollTo(0,0);
-    }
+    let currentRating = 0;
+    function setRating(n) { currentRating = n; const stars = document.getElementById('starInput').children; for(let i=0; i<5; i++) stars[i].className = i < n ? 'active' : ''; }
+
+    function showTab(id, btn) { document.querySelectorAll('.container').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
 
     function saveData(type) {
         const pre = type === 'Practice' ? 'p' : 'm';
@@ -113,91 +101,52 @@
         const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
         const date = document.getElementById(pre+'Date').value;
         const score = parseFloat(document.getElementById(pre+'Score').value);
-        if(!name || !date || isNaN(score)) return alert("Full info please!");
+        if(!name || !date || isNaN(score)) return alert("Data please!");
         const eKey = event.replace(/[^a-zA-Z0-9]/g, '');
-        db.ref(`${userID}/v16/${name}/${eKey}`).push({ type, event, date, score });
+        // Using a fixed path 'final_data' so it never resets
+        db.ref(`${userID}/final_data/${name}/${eKey}`).push({ type, event, date, score, timestamp: Date.now() });
         document.getElementById(pre+'Score').value = '';
     }
 
-    function deletePoint(name, eKey, id) {
-        if(confirm("Delete this entry?")) db.ref(`${userID}/v16/${name}/${eKey}/${id}`).remove();
-    }
-
-    function generateAIAdvice(logs, event) {
-        if(logs.length < 2) return "📝 Record more data to see AI Training Suggestions.";
-        const last = logs[logs.length-1].score;
-        const prev = logs[logs.length-2].score;
-        const isTime = event.includes('m') && !event.includes('Jump');
-        const improved = isTime ? last < prev : last > prev;
-
-        if(improved) return "🚀 **Progress Detected:** Your body is responding well. Keep this intensity but ensure 8 hours of sleep.";
-        
-        if(isTime) return "⚠️ **Warning:** Speed is dropping. Suggestion: 2 days complete recovery or focus on 'Slow-Stretching' and hydration.";
-        return "⚠️ **Warning:** Explosive power decreasing. Suggestion: Focus on 'Lower Body Strength' and reduce jump volume.";
-    }
-
-    function renderSection(snapshot, areaId, filterType) {
-        const area = document.getElementById(areaId); area.innerHTML = '';
-        const data = snapshot.val(); if(!data) return;
-
-        for(let name in data) {
-            const card = document.createElement('div');
-            card.className = 'athlete-card';
-            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${areaId}-${name.replace(/\s/g,'')}"></div>`;
-            
-            let hasMatch = false;
-            for(let eKey in data[name]) {
-                const logs = Object.keys(data[name][eKey]).map(id => ({id, ...data[name][eKey][id]}))
-                             .filter(l => filterType === 'All' || l.type === filterType)
-                             .sort((a,b)=>new Date(a.date)-new Date(b.date));
-                if(logs.length === 0) continue;
-                hasMatch = true;
-
-                const isTime = logs[0].event.includes('m') && !logs[0].event.includes('Jump');
-                const pb = isTime ? Math.min(...logs.map(l=>l.score)) : Math.max(...logs.map(l=>l.score));
-                
-                const gCard = document.createElement('div');
-                gCard.className = 'graph-card';
-                gCard.innerHTML = `
-                    <span class="pb-tag">PB: ${pb}</span><small>${logs[0].event}</small>
-                    <canvas id="c-${areaId}-${name.replace(/\s/g,'')}-${eKey}"></canvas>
-                    <div class="ai-advice"><b>🤖 AI COACH:</b> ${generateAIAdvice(logs, logs[0].event)}</div>
-                    <div class="history-list">
-                        ${logs.map(l => `<div class="history-row"><span>${l.date}</span><span><b>${l.score}</b> <span class="del-x" onclick="deletePoint('${name}','${eKey}','${l.id}')">✕</span></span></div>`).reverse().join('')}
-                    </div>
-                `;
-                card.querySelector('.scroll-x').appendChild(gCard);
-                
-                setTimeout(() => {
-                    new Chart(document.getElementById(`c-${areaId}-${name.replace(/\s/g,'')}-${eKey}`), {
-                        type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: logs[0].type==='Main'?'#dc2626':'#059669', tension:0.3 }] },
-                        options: { plugins:{legend:{display:false}}, scales:{y:{reverse:isTime}, x:{display:false}} }
-                    });
-                }, 100);
-            }
-            if(hasMatch) area.appendChild(card);
-        }
-    }
-
-    db.ref(`${userID}/v16`).on('value', snap => {
-        renderSection(snap, 'practiceArea', 'Practice');
-        renderSection(snap, 'mainArea', 'Main');
-        renderSection(snap, 'displayArea', 'All');
-    });
+    function deletePoint(name, eKey, id) { if(confirm("Delete entry?")) db.ref(`${userID}/final_data/${name}/${eKey}/${id}`).remove(); }
 
     function submitReview() {
         const athlete = document.getElementById('revAthlete').value.trim();
-        const star = document.getElementById('revStar').value;
+        const role = document.getElementById('revRole').value;
         const msg = document.getElementById('revMsg').value;
-        if(athlete && msg) db.ref(`${userID}/v16_revs`).push({ athlete, star, msg, date: new Date().toLocaleDateString() });
+        if(!athlete || currentRating === 0) return;
+        db.ref(`${userID}/final_reviews`).push({ athlete, role, rating: currentRating, msg, date: new Date().toLocaleDateString() });
+        setRating(0); document.getElementById('revMsg').value = '';
     }
 
-    db.ref(`${userID}/v16_revs`).on('value', snap => {
+    function render(snapshot, areaId, filterType) {
+        const area = document.getElementById(areaId); area.innerHTML = '';
+        const data = snapshot.val(); if(!data) return;
+        for(let name in data) {
+            const card = document.createElement('div'); card.className = 'athlete-card';
+            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${areaId}-${name.replace(/\s/g,'')}"></div>`;
+            let match = false;
+            for(let eKey in data[name]) {
+                const logs = Object.keys(data[name][eKey]).map(id => ({id, ...data[name][eKey][id]}))
+                             .filter(l => filterType === 'All' || l.type === filterType).sort((a,b)=>a.timestamp - b.timestamp);
+                if(logs.length === 0) continue; match = true;
+                const isTime = logs[0].event.includes('m') && !logs[0].event.includes('Jump');
+                const gCard = document.createElement('div'); gCard.className = 'graph-card';
+                gCard.innerHTML = `<small>${logs[0].event}</small><canvas id="c-${areaId}-${name.replace(/\s/g,'')}-${eKey}"></canvas>
+                <div class="ai-advice"><b>AI:</b> ${logs.length > 1 ? (isTime ? (logs[logs.length-1].score < logs[logs.length-2].score ? "Improving!" : "Recover needed") : (logs[logs.length-1].score > logs[logs.length-2].score ? "Stronger!" : "Rest needed")) : "Collecting data..."}</div>
+                <div class="history-list">${logs.map(l => `<div class="history-row"><span>${l.date}</span><span>${l.score} <span class="del-x" onclick="deletePoint('${name}','${eKey}','${l.id}')">✕</span></span></div>`).reverse().join('')}</div>`;
+                card.querySelector('.scroll-x').appendChild(gCard);
+                setTimeout(() => { new Chart(document.getElementById(`c-${areaId}-${name.replace(/\s/g,'')}-${eKey}`), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb' }] }, options: { scales:{y:{reverse:isTime}, x:{display:false}} } }); }, 100);
+            }
+            if(match) area.appendChild(card);
+        }
+    }
+
+    db.ref(`${userID}/final_data`).on('value', snap => { render(snap, 'practiceArea', 'Practice'); render(snap, 'mainArea', 'Main'); render(snap, 'displayArea', 'All'); });
+    db.ref(`${userID}/final_reviews`).on('value', snap => {
         const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
         const data = snap.val(); if(!data) return;
-        Object.values(data).reverse().forEach(r => {
-            wall.innerHTML += `<div class="card" style="font-size:13px;"><b>${r.athlete}</b> - ${'★'.repeat(r.star)}<br>${r.msg}</div>`;
-        });
+        Object.values(data).reverse().forEach(r => { wall.innerHTML += `<div class="rev-card"><b>${r.athlete}</b> (${r.role})<br>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}<br>${r.msg}</div>`; });
     });
 </script>
 </body>
