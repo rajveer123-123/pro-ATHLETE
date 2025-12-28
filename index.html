@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Master v20</title>
+    <title>Elite Performance Lab v26</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,15 +18,16 @@
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
-        .star-rating { display: flex; justify-content: center; gap: 10px; margin: 10px 0; font-size: 30px; color: #cbd5e1; cursor: pointer; }
+        .star-rating { display: flex; justify-content: center; gap: 10px; margin: 10px 0; font-size: 35px; color: #cbd5e1; cursor: pointer; }
         .star-rating span.active { color: #fbbf24; }
-        .athlete-card { background: white; border-radius: 25px; margin-bottom: 25px; padding: 15px; border-left: 8px solid var(--primary); }
-        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scroll-snap-type: x mandatory; }
-        .scroll-x::-webkit-scrollbar { display: none; }
-        .graph-card { min-width: 300px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; scroll-snap-align: start; }
-        .ai-advice { background: #eff6ff; border: 1px dashed var(--primary); padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 11px; color: #1e40af; }
-        .del-x { color: #ef4444; font-weight: bold; cursor: pointer; padding-left: 10px; }
-        .history-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px dotted #eee; }
+        .live-count { background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-left: 10px; border: 1px solid #bae6fd; }
+        .athlete-card { background: white; border-radius: 25px; margin-bottom: 30px; padding: 20px; border-left: 10px solid var(--primary); }
+        .scroll-x { display: flex; overflow-x: auto; gap: 20px; padding: 10px 0; }
+        .graph-card { min-width: 320px; background: #fff; border: 1px solid #f1f5f9; border-radius: 24px; padding: 20px; }
+        .ai-status-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px; margin-top: 15px; font-size: 12px; }
+        .status-bad { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        .ai-workout-box { background: #fff7ed; border: 1px solid #fdba74; padding: 12px; border-radius: 12px; margin-top: 10px; color: #9a3412; font-size: 11px; }
+        .del-x { color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 10px; }
     </style>
 </head>
 <body>
@@ -38,43 +39,48 @@
     </div>
 
     <div id="page-practice" class="container active">
-        <h2 style="color: var(--practice)">🏃 Practice (Reps & Drills)</h2>
+        <h2 style="color: var(--practice)">🏃 Practice Entry</h2>
         <div class="card">
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <optgroup label="Sprint Drills (Seconds)">
+                <optgroup label="Sprint Drills">
                     <option>30m Sprint</option><option>40m Sprint</option><option>80m Sprint</option>
-                    <option>120m Sprint</option><option>150m Sprint</option><option>180m Sprint</option><option>300m Sprint</option>
+                    <option>120m Sprint</option><option>150m Sprint</option><option>180m Sprint</option>
+                    <option>300m Sprint</option>
                 </optgroup>
-                <optgroup label="Jump Drills (Meters)">
+                <optgroup label="Jump Drills">
                     <option>Broad Jump</option><option>Standing Triple Jump</option>
-                    <option>5-Bonded Jumps</option><option>10-Bonded Jumps</option>
+                    <option>5 Bonded Jumps</option><option>10 Bonded Jumps</option>
+                </optgroup>
+                <optgroup label="Throw Drills">
+                    <option>Medicine Ball Throw</option><option>Back Throw</option>
                 </optgroup>
             </select>
             <input type="number" step="0.01" id="pScore" placeholder="Result">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE REPETITION</button>
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
         <div id="practiceArea"></div>
     </div>
 
     <div id="page-main" class="container">
-        <h2 style="color: var(--main)">🏆 Official Main Events</h2>
+        <h2 style="color: var(--main)">🏆 Main Events</h2>
         <div class="card">
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-                <optgroup label="Track">
+                <optgroup label="Track Events">
                     <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option>
-                    <option>800m Run</option><option>1500m Run</option><option>4x100m Relay</option>
+                    <option>800m Run</option><option>1500m Run</option><option>5000m Run</option>
+                    <option>110m Hurdles</option><option>400m Hurdles</option><option>4x100m Relay</option>
                 </optgroup>
-                <optgroup label="Field">
+                <optgroup label="Field Events">
                     <option>Long Jump</option><option>Triple Jump</option><option>High Jump</option>
                     <option>Shot Put</option><option>Javelin Throw</option><option>Discus Throw</option>
                 </optgroup>
             </select>
-            <input type="number" step="0.01" id="mScore" placeholder="Official Result">
+            <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
-            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE MAIN EVENT</button>
+            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE EVENT</button>
         </div>
         <div id="mainArea"></div>
     </div>
@@ -94,7 +100,7 @@
     </div>
 
     <div id="page-dash" class="container">
-        <h2 style="color: var(--primary)">📊 Overall Analytics Hub</h2>
+        <h2 style="color: var(--primary)">📊 AI Performance Hub</h2>
         <div id="displayArea"></div>
     </div>
 
@@ -102,12 +108,12 @@
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let userID = localStorage.getItem('athleteTracker_ID') || 'user_v20_final';
+    let userID = localStorage.getItem('athleteTracker_ID') || 'user_v26_final';
     localStorage.setItem('athleteTracker_ID', userID);
 
     let currentRating = 0;
     function setRating(n) { currentRating = n; const stars = document.getElementById('starInput').children; for(let i=0; i<5; i++) stars[i].className = i < n ? 'active' : ''; }
-    function showTab(id, btn) { document.querySelectorAll('.container').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
+    function showTab(id, btn) { document.querySelectorAll('.container').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); window.scrollTo(0,0); }
 
     function saveData(type) {
         const pre = type === 'Practice' ? 'p' : 'm';
@@ -115,52 +121,53 @@
         const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
         const date = document.getElementById(pre+'Date').value;
         const score = parseFloat(document.getElementById(pre+'Score').value);
-        if(!name || !date || isNaN(score)) return alert("Full data please!");
+        if(!name || !date || isNaN(score)) return alert("Full info!");
         const eKey = event.replace(/[^a-zA-Z0-9]/g, '');
-        db.ref(`${userID}/data/${name}/${eKey}`).push({ type, event, date, score, ts: Date.now() });
+        db.ref(`${userID}/master/${name}/${eKey}`).push({ type, event, date, score, ts: Date.now() });
         document.getElementById(pre+'Score').value = '';
     }
 
-    function deletePoint(name, eKey, id) { if(confirm("Delete entry?")) db.ref(`${userID}/data/${name}/${eKey}/${id}`).remove(); }
+    function deletePoint(name, eKey, id) { if(confirm("Delete this?")) db.ref(`${userID}/master/${name}/${eKey}/${id}`).remove(); }
 
-    function submitReview() {
-        const athlete = document.getElementById('revAthlete').value.trim();
-        const role = document.getElementById('revRole').value;
-        const msg = document.getElementById('revMsg').value;
-        if(!athlete || currentRating === 0 || !msg) return alert("Stars & Message needed!");
-        db.ref(`${userID}/reviews`).push({ athlete, role, rating: currentRating, msg, date: new Date().toLocaleDateString() });
-        setRating(0); document.getElementById('revMsg').value = '';
+    function getAIAnalysis(logs, event) {
+        if(logs.length < 2) return { status: "Recording data...", class: "", workout: "Perform more reps for AI." };
+        const last = logs[logs.length-1].score;
+        const prev = logs[logs.length-2].score;
+        const isTime = (event.includes('m') || event.includes('Sprint')) && !event.includes('Jump') && !event.includes('Throw');
+        const improved = isTime ? last < prev : last > prev;
+        if(!improved) return { status: "⚠️ DECREASE: Recovery recommended.", class: "status-bad", workout: "Workout: Rest & Stretching." };
+        return { status: "🚀 IMPROVEMENT: Peak Performance!", class: "", workout: "Workout: Maintain current intensity." };
     }
 
     function render(snapshot, areaId, filterType) {
         const area = document.getElementById(areaId); area.innerHTML = '';
         const data = snapshot.val(); if(!data) return;
         for(let name in data) {
+            let totalSessions = 0;
             const card = document.createElement('div'); card.className = 'athlete-card';
-            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${areaId}-${name.replace(/\s/g,'')}"></div>`;
+            for(let key in data[name]) totalSessions += Object.keys(data[name][key]).length;
+            card.innerHTML = `<div style="font-weight:800; display:flex; align-items:center;">👤 ${name} <span class="live-count">Sessions: ${totalSessions}</span></div><div class="scroll-x" id="sc-${areaId}-${name.replace(/\s/g,'')}"></div>`;
             let match = false;
             for(let eKey in data[name]) {
-                const logs = Object.keys(data[name][eKey]).map(id => ({id, ...data[name][eKey][id]}))
-                             .filter(l => filterType === 'All' || l.type === filterType).sort((a,b)=>a.ts - b.ts);
+                const logs = Object.keys(data[name][eKey]).map(id => ({id, ...data[name][eKey][id]})).filter(l => filterType === 'All' || l.type === filterType).sort((a,b)=>a.ts - b.ts);
                 if(logs.length === 0) continue; match = true;
-                const isTime = (logs[0].event.includes('m') || logs[0].event.includes('Sprint')) && !logs[0].event.includes('Jump');
+                const isTime = (logs[0].event.includes('m') || logs[0].event.includes('Sprint')) && !logs[0].event.includes('Jump') && !logs[0].event.includes('Throw');
+                const ai = getAIAnalysis(logs, logs[0].event);
                 const gCard = document.createElement('div'); gCard.className = 'graph-card';
-                gCard.innerHTML = `<small>${logs[0].event}</small><canvas id="c-${areaId}-${name.replace(/\s/g,'')}-${eKey}"></canvas>
-                <div class="ai-advice"><b>AI:</b> ${logs.length > 1 ? (isTime ? (logs[logs.length-1].score < logs[logs.length-2].score ? "Improving!" : "Recovery needed") : (logs[logs.length-1].score > logs[logs.length-2].score ? "Stronger!" : "Rest needed")) : "Analyzing..."}</div>
-                <div class="history-list">${logs.map(l => `<div class="history-row"><span>${l.date}</span><span><b>${l.score}</b> <span class="del-x" onclick="deletePoint('${name}','${eKey}','${l.id}')">✕</span></span></div>`).reverse().join('')}</div>`;
+                gCard.innerHTML = `<strong>${logs[0].event}</strong><canvas id="c-${areaId}-${name.replace(/\s/g,'')}-${eKey}"></canvas>
+                <div class="ai-status-box ${ai.class}"><b>${ai.status}</b></div>
+                <div class="ai-workout-box"><b>AI Suggestion:</b> ${ai.workout}</div>
+                <div style="margin-top:10px;">${logs.map(l => `<div style="display:flex; justify-content:space-between; font-size:11px; padding:4px 0; border-bottom:1px dotted #eee;"><span>${l.date}</span><span>${l.score} <span class="del-x" onclick="deletePoint('${name}','${eKey}','${l.id}')">✕</span></span></div>`).reverse().join('')}</div>`;
                 card.querySelector('.scroll-x').appendChild(gCard);
-                setTimeout(() => { new Chart(document.getElementById(`c-${areaId}-${name.replace(/\s/g,'')}-${eKey}`), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: logs[0].type==='Main'?'#dc2626':'#059669', tension: 0.3 }] }, options: { scales:{y:{reverse:isTime}, x:{display:false}}, plugins:{legend:{display:false}} } }); }, 100);
+                setTimeout(() => { new Chart(document.getElementById(`c-${areaId}-${name.replace(/\s/g,'')}-${eKey}`), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.3, pointRadius: 4 }] }, options: { scales:{y:{reverse:isTime}, x:{display:false}}, plugins:{legend:{display:false}} } }); }, 100);
             }
             if(match) area.appendChild(card);
         }
     }
 
-    db.ref(`${userID}/data`).on('value', snap => { render(snap, 'practiceArea', 'Practice'); render(snap, 'mainArea', 'Main'); render(snap, 'displayArea', 'All'); });
-    db.ref(`${userID}/reviews`).on('value', snap => {
-        const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-        Object.values(data).reverse().forEach(r => { wall.innerHTML += `<div class="card" style="border-left:5px solid var(--review)"><b>${r.athlete}</b> (${r.role})<br><span style="color:#fbbf24">${'★'.repeat(r.rating)}</span><br>${r.msg}</div>`; });
-    });
+    db.ref(`${userID}/master`).on('value', snap => { render(snap, 'practiceArea', 'Practice'); render(snap, 'mainArea', 'Main'); render(snap, 'displayArea', 'All'); });
+    function submitReview() { const athlete = document.getElementById('revAthlete').value; const role = document.getElementById('revRole').value; const msg = document.getElementById('revMsg').value; if(athlete && msg && currentRating > 0) db.ref(`${userID}/reviews`).push({ athlete, role, rating: currentRating, msg, date: new Date().toLocaleDateString() }); setRating(0); document.getElementById('revMsg').value = ''; }
+    db.ref(`${userID}/reviews`).on('value', snap => { const wall = document.getElementById('reviewWall'); wall.innerHTML = ''; const data = snap.val(); if(!data) return; Object.values(data).reverse().forEach(r => { wall.innerHTML += `<div class="card" style="border-left:5px solid var(--review)"><b>${r.athlete}</b> (${r.role})<br><span style="color:#fbbf24">${'★'.repeat(r.rating)}</span><br>${r.msg}</div>`; }); });
 </script>
 </body>
 </html>
