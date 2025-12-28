@@ -3,88 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Athlete Tracker Pro</title>
+    <title>Elite Athlete Pro - 4 Tab System</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --dark: #0f172a; --bg: #f1f5f9; --red: #ef4444; --green: #22c55e; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: auto; }
+        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --review: #f59e0b; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 70px; }
         
-        .main-card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        /* TOP NAVIGATION */
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
+        .nav-btn { min-width: 90px; flex: 1; padding: 20px 5px; text-align: center; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; white-space: nowrap; }
+        .nav-btn.active { color: var(--primary); background: #f0f7ff; border-bottom: 4px solid var(--primary); }
 
-        .athlete-card { background: white; padding: 20px; border-radius: 24px; margin-bottom: 20px; position: relative; border: 1px solid #eef2f6; }
-        .del-athlete { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.2rem; }
-        .athlete-name { font-size: 1.6rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; border-left: 5px solid var(--primary); padding-left: 12px; }
+        .container { padding: 15px; display: none; animation: fadeIn 0.3s ease; }
+        .container.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .pb-box { background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
-        .pb-box span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
-        .pb-box div { font-size: 1rem; color: var(--primary); font-weight: 800; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; font-family: inherit; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
 
-        .scroll-container { display: none; overflow-x: auto; white-space: nowrap; padding: 10px 0; scroll-snap-type: x mandatory; gap: 15px; }
-        .graph-box { display: inline-block; min-width: 300px; width: 90%; background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-right: 15px; scroll-snap-align: center; vertical-align: top; }
-        .drawer-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        /* DASHBOARD & HORIZONTAL SCROLL */
+        .athlete-card { background: white; border-radius: 25px; margin-bottom: 25px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .athlete-name { font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; border-left: 6px solid var(--primary); padding-left: 12px; }
+        
+        .scroll-container { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .scroll-container::-webkit-scrollbar { display: none; }
+        
+        .graph-card { min-width: 280px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; scroll-snap-align: start; }
+        .pb-tag { background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; float: right; }
 
-        .rev-card { background: var(--dark); color: white; padding: 20px; border-radius: 24px; margin-top: 40px; }
-        .rev-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .rev-content { display: none; margin-top: 15px; transition: 0.3s; }
-        .stars { color: #fbbf24; font-size: 30px; cursor: pointer; margin-bottom: 10px; }
+        /* REVIEW DISPLAY IN DASHBOARD */
+        .rev-item { background: #f8fafc; border-left: 4px solid var(--review); padding: 10px; margin-bottom: 8px; font-size: 13px; border-radius: 8px; }
+        .rev-role { font-size: 10px; font-weight: bold; color: var(--review); text-transform: uppercase; }
+        
+        .del-x { color: #ef4444; float: right; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="main-card">
-        <h2>🏅 Performance Hub</h2>
-        <input type="text" id="pName" placeholder="Athlete Name">
-        <select id="sEvent">
-            <option value="">-- Select Event --</option>
-            <optgroup label="Sprints"><option>100m</option><option>200m</option><option>400m</option></optgroup>
-            <optgroup label="Middle/Long Distance"><option>800m</option><option>1500m</option><option>3000m Steeplechase</option><option>5000m</option><option>10000m</option></optgroup>
-            <optgroup label="Hurdles"><option>100m/110m Hurdles</option><option>400m Hurdles</option></optgroup>
-            <optgroup label="Relays"><option>4x100m Relay</option><option>4x400m Relay</option></optgroup>
-            <optgroup label="Jumps"><option>Long Jump</option><option>High Jump</option><option>Triple Jump</option><option>Pole Vault</option></optgroup>
-            <optgroup label="Throws"><option>Shot Put</option><option>Discus Throw</option><option>Javelin Throw</option><option>Hammer Throw</option></optgroup>
-            <optgroup label="Combined/Other"><option>Decathlon/Heptathlon</option><option>20km Race Walk</option></optgroup>
-        </select>
-        <input type="date" id="pDate">
-        <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meters)">
-        <button class="btn-save" onclick="saveData()">SAVE PERFORMANCE</button>
+    <div class="nav">
+        <div class="nav-btn active" id="nav-p" onclick="showTab('page-practice', 'nav-p')">PRACTICE</div>
+        <div class="nav-btn" id="nav-m" onclick="showTab('page-main', 'nav-m')">MAIN EVENT</div>
+        <div class="nav-btn" id="nav-r" onclick="showTab('page-review', 'nav-r')">REVIEWS</div>
+        <div class="nav-btn" id="nav-d" onclick="showTab('page-dash', 'nav-d')">DASHBOARD</div>
     </div>
 
-    <div id="displayArea"></div>
-
-    <div class="rev-card">
-        <div class="rev-header" onclick="toggleReviews()">
-            <h3 style="margin:0;">💬 Reviews <span id="revCount" style="background:#fbbf24; color:#000; padding:2px 8px; border-radius:10px; font-size:12px;">0</span></h3>
-            <span id="revArrow">▼</span>
-        </div>
-        <div id="revContent" class="rev-content">
-            <hr style="border: 0.5px solid #334155; margin-bottom: 15px;">
-            <input type="text" id="revUser" placeholder="Your Name">
-            <select id="revRole"><option>Coach</option><option>Student</option><option>Viewer</option></select>
-            <div class="stars" id="starBox">
-                <span onclick="setStar(1)">☆</span><span onclick="setStar(2)">☆</span><span onclick="setStar(3)">☆</span><span onclick="setStar(4)">☆</span><span onclick="setStar(5)">☆</span>
-            </div>
-            <textarea id="revMsg" style="width:100%; border-radius:10px; padding:10px; box-sizing: border-box;" placeholder="Write feedback..."></textarea>
-            <button class="btn-save" style="background:#fbbf24; color:#000; margin-top:10px;" onclick="saveReview()">SUBMIT REVIEW</button>
-            <div id="reviewList" style="margin-top:20px;"></div>
+    <div id="page-practice" class="container active">
+        <h2 style="color: var(--practice)">🏃 Practice Session</h2>
+        <div class="card">
+            <input type="text" id="pName" placeholder="Athlete Name">
+            <select id="pDrill">
+                <optgroup label="Sprints">
+                    <option>30m Sprint</option><option>40m Sprint</option><option>80m Sprint</option>
+                    <option>120m Sprint</option><option>150m Sprint</option><option>180m Sprint</option><option>300m Sprint</option>
+                </optgroup>
+                <optgroup label="Jumps">
+                    <option>Broad Jump</option><option>Standing Triple Jump</option>
+                    <option>5-Bonded Jumps</option><option>10-Bonded Jumps</option>
+                </optgroup>
+                <optgroup label="Throws">
+                    <option>Ball Throw</option><option>Back Throw</option>
+                </optgroup>
+            </select>
+            <input type="number" step="0.01" id="pScore" placeholder="Result (Time/Distance)">
+            <input type="date" id="pDate">
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
     </div>
-</div>
+
+    <div id="page-main" class="container">
+        <h2 style="color: var(--main)">🏆 Main Event / Trial</h2>
+        <div class="card">
+            <input type="text" id="mName" placeholder="Athlete Name">
+            <select id="mEvent">
+                <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option>
+                <option>800m Run</option><option>Long Jump</option><option>Triple Jump</option>
+                <option>Shot Put</option><option>Javelin Throw</option>
+            </select>
+            <input type="number" step="0.01" id="mScore" placeholder="Final Result">
+            <input type="date" id="mDate">
+            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE MAIN EVENT</button>
+        </div>
+    </div>
+
+    <div id="page-review" class="container">
+        <h2 style="color: var(--review)">💬 Give Feedback</h2>
+        <div class="card">
+            <label>Select Athlete:</label>
+            <input type="text" id="revName" placeholder="Athlete Name (e.g. Rahul)">
+            <label>I am a:</label>
+            <select id="revRole">
+                <option>Coach</option>
+                <option>Student</option>
+                <option>Viewer</option>
+            </select>
+            <textarea id="revText" rows="4" placeholder="Write your review or advice here..."></textarea>
+            <button class="btn" style="background: var(--review)" onclick="submitReview()">SUBMIT REVIEW</button>
+        </div>
+    </div>
+
+    <div id="page-dash" class="container">
+        <h2 style="color: var(--primary)">📊 Analytics Dashboard</h2>
+        <div id="displayArea"></div>
+    </div>
 
 <script>
-    // --- Unique User Identity ---
-    let userID = localStorage.getItem('athleteTracker_ID');
-    if (!userID) {
-        userID = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('athleteTracker_ID', userID);
-    }
-
     const firebaseConfig = {
         apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0",
         authDomain: "athletetracker-5efd6.firebaseapp.com",
@@ -93,112 +118,105 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let userID = localStorage.getItem('athleteTracker_ID') || 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('athleteTracker_ID', userID);
 
-    let chartStorage = {};
-    let starRating = 0;
-
-    function toggleReviews() {
-        const content = document.getElementById('revContent');
-        const arrow = document.getElementById('revArrow');
-        content.style.display = (content.style.display === "block") ? "none" : "block";
-        arrow.innerText = (content.style.display === "block") ? "▲" : "▼";
+    function showTab(pId, nId) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pId).classList.add('active');
+        document.getElementById(nId).classList.add('active');
+        window.scrollTo(0,0);
     }
 
-    function saveData() {
-        const n = document.getElementById('pName').value.trim();
-        const e = document.getElementById('sEvent').value;
-        const d = document.getElementById('pDate').value;
-        const s = parseFloat(document.getElementById('pScore').value);
-        if(!n || !e || !d || isNaN(s)) return alert("Fill all fields");
+    function saveData(type) {
+        const pre = type === 'Practice' ? 'p' : 'm';
+        const name = document.getElementById(pre+'Name').value.trim();
+        const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
+        const date = document.getElementById(pre+'Date').value;
+        const score = parseFloat(document.getElementById(pre+'Score').value);
 
-        const eKey = e.replace(/[^a-zA-Z0-9]/g, '');
-        // Data is now saved under the unique userID
-        db.ref(`${userID}/athletes/${n}/${eKey}`).push({ date: d, score: s, eventName: e });
-        document.getElementById('pScore').value = '';
+        if(!name || !date || isNaN(score)) return alert("Fill all fields!");
+        const eKey = event.replace(/[^a-zA-Z0-9]/g, '');
+        db.ref(`${userID}/v11_data/${name}/records/${eKey}`).push({ type, event, date, score });
+        document.getElementById(pre+'Score').value = '';
+        alert("Saved! Check Dashboard.");
     }
 
-    function deleteAthlete(name) { if(confirm(`Delete ${name}?`)) db.ref(`${userID}/athletes/${name}`).remove(); }
-    function deleteSport(name, key) { if(confirm("Delete this sport?")) db.ref(`${userID}/athletes/${name}/${key}`).remove(); }
+    function submitReview() {
+        const name = document.getElementById('revName').value.trim();
+        const role = document.getElementById('revRole').value;
+        const text = document.getElementById('revText').value;
+        if(!name || !text) return alert("Enter athlete name and review!");
 
-    function toggleScroll(id) {
-        const el = document.getElementById(`scroll-${id}`);
-        el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+        db.ref(`${userID}/v11_data/${name}/reviews`).push({
+            role, text, date: new Date().toLocaleDateString()
+        });
+        document.getElementById('revText').value = '';
+        alert("Review Submitted!");
     }
 
-    db.ref(`${userID}/athletes`).on('value', snap => {
-        const area = document.getElementById('displayArea');
-        area.innerHTML = '';
-        Object.values(chartStorage).forEach(c => c.destroy());
-        chartStorage = {};
+    function deleteEntry(name, eKey, id) {
+        if(confirm("Delete this?")) db.ref(`${userID}/v11_data/${name}/records/${eKey}/${id}`).remove();
+    }
 
-        const data = snap.val();
-        if(!data) return;
+    db.ref(`${userID}/v11_data`).on('value', snap => {
+        const area = document.getElementById('displayArea'); area.innerHTML = '';
+        const data = snap.val(); if(!data) return;
 
-        for(let athlete in data) {
-            const sID = athlete.replace(/\s/g, '');
+        for(let name in data) {
+            const athleteId = name.replace(/\s/g,'');
             const card = document.createElement('div');
             card.className = 'athlete-card';
             card.innerHTML = `
-                <button class="del-athlete" onclick="deleteAthlete('${athlete}')">🗑️</button>
-                <div class="athlete-name">👤 ${athlete}</div>
-                <div class="pb-grid" id="pb-g-${sID}"></div>
-                <button class="drawer-btn" onclick="toggleScroll('${sID}')">📊 VIEW ALL GRAPHS</button>
-                <div class="scroll-container" id="scroll-${sID}"></div>
+                <div class="athlete-name">👤 ${name}</div>
+                <div class="scroll-container" id="scroll-${athleteId}"></div>
+                <div style="margin-top:15px;">
+                    <small><b>REVIEWS:</b></small>
+                    <div id="rev-list-${athleteId}" style="margin-top:5px;"></div>
+                </div>
             `;
             area.appendChild(card);
 
-            for(let eKey in data[athlete]) {
-                const logs = Object.values(data[athlete][eKey]).sort((a,b) => new Date(a.date) - new Date(b.date));
-                const scores = logs.map(l => l.score);
-                const evName = logs[0].eventName;
-                const isTime = /m|Relay|Hurdle/i.test(evName) && !/Jump|Throw|Put/i.test(evName);
-                const unit = isTime ? "s" : "m";
-                const pb = isTime ? Math.min(...scores) : Math.max(...scores);
+            // Display Reviews
+            const revList = document.getElementById(`rev-list-${athleteId}`);
+            if(data[name].reviews) {
+                Object.values(data[name].reviews).reverse().forEach(r => {
+                    revList.innerHTML += `<div class="rev-item">
+                        <span class="rev-role">${r.role} • ${r.date}</span><br>${r.text}
+                    </div>`;
+                });
+            } else { revList.innerHTML = "<small style='color:#999'>No reviews yet.</small>"; }
 
-                document.getElementById(`pb-g-${sID}`).innerHTML += `<div class="pb-box"><span>${evName}</span><div>${pb}${unit}</div></div>`;
+            // Display Graphs
+            const records = data[name].records;
+            for(let eKey in records) {
+                const logs = Object.keys(records[eKey]).map(id => ({id, ...records[eKey][id]})).sort((a,b)=>new Date(a.date)-new Date(b.date));
+                const isTime = logs[0].event.includes('m') && !logs[0].event.includes('Jump') && !logs[0].event.includes('Throw');
+                const pb = isTime ? Math.min(...logs.map(l=>l.score)) : Math.max(...logs.map(l=>l.score));
 
-                const canvasId = `c-${sID}-${eKey}`;
-                const box = document.createElement('div');
-                box.className = 'graph-box';
-                box.innerHTML = `<div style="display:flex; justify-content:space-between"><b>${evName}</b> <button onclick="deleteSport('${athlete}','${eKey}')" style="border:none;background:none;cursor:pointer">❌</button></div><canvas id="${canvasId}"></canvas>`;
-                document.getElementById(`scroll-${sID}`).appendChild(box);
+                const gCard = document.createElement('div');
+                gCard.className = 'graph-card';
+                gCard.innerHTML = `
+                    <span class="pb-tag">PB: ${pb}${isTime?'s':'m'}</span>
+                    <strong style="font-size:13px;">${logs[0].event}</strong>
+                    <canvas id="ch-${athleteId}-${eKey}"></canvas>
+                    <div style="font-size:10px; margin-top:8px; color:#64748b;">
+                        Latest: ${logs[logs.length-1].score} <span class="del-x" onclick="deleteEntry('${name}','${eKey}','${logs[logs.length-1].id}')">✕</span>
+                    </div>
+                `;
+                document.getElementById(`scroll-${athleteId}`).appendChild(gCard);
 
-                const ctx = document.getElementById(canvasId).getContext('2d');
-                chartStorage[canvasId] = new Chart(ctx, {
+                new Chart(document.getElementById(`ch-${athleteId}-${eKey}`), {
                     type: 'line',
                     data: {
                         labels: logs.map(l => l.date),
-                        datasets: [{
-                            data: scores,
-                            segment: { borderColor: ctx => {
-                                const p1 = ctx.p0.parsed.y; const p2 = ctx.p1.parsed.y;
-                                const imp = isTime ? p2 < p1 : p2 > p1;
-                                return imp ? '#22c55e' : '#ef4444';
-                            }},
-                            borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff'
-                        }]
+                        datasets: [{ data: logs.map(l=>l.score), borderColor: logs[0].type==='Main'?'#dc2626':'#059669', tension:0.3, pointRadius:4 }]
                     },
-                    options: { scales: { y: { reverse: isTime, ticks: { callback: v => v + unit } } }, plugins: { legend: { display: false } } }
+                    options: { plugins: { legend: { display: false } }, scales: { y: { reverse: isTime }, x: { display: false } } }
                 });
             }
         }
-    });
-
-    function setStar(n) { starRating = n; const s = document.getElementById('starBox').children; for(let i=0;i<5;i++) s[i].innerText = i<n?'★':'☆'; }
-    function saveReview() {
-        const u = document.getElementById('revUser').value; const r = document.getElementById('revRole').value; const m = document.getElementById('revMsg').value;
-        if(!u || !m || starRating === 0) return alert("Complete review!");
-        db.ref('reviews').push({ user: u, role: r, msg: m, stars: starRating });
-        document.getElementById('revMsg').value = ''; setStar(0);
-    }
-    db.ref('reviews').on('value', snap => {
-        const list = document.getElementById('reviewList'); list.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-        document.getElementById('revCount').innerText = Object.keys(data).length;
-        Object.values(data).reverse().forEach(r => {
-            list.innerHTML += `<div style="background:#1e293b; padding:10px; border-radius:10px; margin-bottom:10px; border-left:3px solid #fbbf24">
-                <b>${r.user} (${r.role})</b> <span style="color:#fbbf24">${"★".repeat(r.stars)}</span><br><small>${r.msg}</small></div>`;
-        });
     });
 </script>
 </body>
