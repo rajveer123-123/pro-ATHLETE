@@ -3,134 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Master v30</title>
+    <title>Elite Performance Pro v32</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --premium: #7c3aed; --review: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
-        .nav-btn { min-width: 90px; flex: 1; padding: 20px 5px; text-align: center; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; white-space: nowrap; }
-        .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #f0f7ff; }
+        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --premium: #7c3aed; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; }
+        .nav-btn { min-width: 90px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; }
+        .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
         .container.active { display: block; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
-        .report-card { background: white; border-radius: 24px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px; position: relative; }
-        .grade-badge { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--premium); color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .paywall { display: none; text-align: center; padding: 40px 20px; background: #fff; border: 2px solid var(--premium); border-radius: 25px; }
         .pay-link { display:block; background:#22c55e; color:white; padding:15px; border-radius:12px; text-decoration:none; font-weight:bold; margin-top:15px; }
         .athlete-card { background: white; border-radius: 25px; margin-bottom: 30px; padding: 20px; border-left: 10px solid var(--primary); }
         .scroll-x { display: flex; overflow-x: auto; gap: 20px; padding: 10px 0; }
         .graph-card { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center; }
-        .modal-content { background:white; padding:20px; border-radius:20px; width:85%; max-width:400px; }
-        .del-x { color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .star-rating { font-size: 30px; color: #cbd5e1; cursor: pointer; text-align: center; }
-        .star-rating span.active { color: #fbbf24; }
+        .ai-box { background:#f0f7ff; padding:12px; border-radius:12px; font-size:13px; margin-top:10px; border-left: 4px solid var(--primary); line-height: 1.5; }
     </style>
 </head>
 <body>
+
     <div class="nav">
         <div class="nav-btn active" onclick="showTab('page-practice', this)">PRACTICE</div>
         <div class="nav-btn" onclick="showTab('page-main', this)">MAIN</div>
         <div class="nav-btn" onclick="showTab('page-dash', this)">DASHBOARD</div>
         <div class="nav-btn" onclick="showTab('page-reports', this)">AI REPORTS</div>
-        <div class="nav-btn" onclick="showTab('page-review', this)">REVIEWS</div>
     </div>
 
     <div id="page-practice" class="container active">
-        <h2 style="color: var(--practice)">🏃 Practice Entry</h2>
+        <h2 style="color: var(--practice)">🏃 Training Session</h2>
         <div class="card">
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <optgroup label="Sprints">
-                    <option>30m Sprint</option><option>40m Sprint</option><option>80m Sprint</option>
-                    <option>120m Sprint</option><option>150m Sprint</option><option>180m Sprint</option><option>300m Sprint</option>
-                </optgroup>
-                <optgroup label="Jumps">
-                    <option>Broad Jump</option><option>Standing Triple Jump</option><option>5 Bonded Jumps</option><option>10 Bonded Jumps</option>
-                </optgroup>
-                <optgroup label="Throws">
-                    <option>Medicine Ball Throw</option><option>Back Throw</option>
-                </optgroup>
+                <option>30m Sprint</option><option>80m Sprint</option><option>150m Sprint</option><option>300m Sprint</option>
+                <option>Broad Jump</option><option>5 Bonded Jumps</option><option>10 Bonded Jumps</option>
+                <option>Medicine Ball Throw</option><option>Back Throw</option>
             </select>
-            <input type="number" step="0.01" id="pScore" placeholder="Result">
+            <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meter)">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
         </div>
-        <div id="practiceArea"></div>
     </div>
 
     <div id="page-main" class="container">
-        <h2 style="color: var(--main)">🏆 Main Events</h2>
+        <h2 style="color: var(--main)">🏆 Official Trials</h2>
         <div class="card">
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-                <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option><option>800m Run</option>
+                <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option>
                 <option>Long Jump</option><option>Triple Jump</option><option>Shot Put</option><option>Discus Throw</option>
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
             <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE EVENT</button>
         </div>
-        <div id="mainArea"></div>
-    </div>
-
-    <div id="page-dash" class="container">
-        <h2 style="color: var(--primary)">📊 Analytics Dashboard</h2>
-        <div id="displayArea"></div>
     </div>
 
     <div id="page-reports" class="container">
-        <h2 onclick="adminCheck()" style="color: var(--premium)">📜 AI Monthly Reports</h2>
-        <p id="trial-info" style="font-size: 11px; color: #64748b;"></p>
+        <h2 id="report-title" onclick="adminCheck()" style="color: var(--premium)">📜 AI Monthly Reports</h2>
         <div id="reports-list"></div>
         <div id="paywall-screen" class="paywall">
             <h3>Premium Locked 🔒</h3>
-            <p>Your trial expired. Please pay to continue.</p>
+            <p>Your trial expired. Pay & enter Transaction ID to unlock instantly.</p>
             <div id="payment-box"></div>
+            <input type="text" id="userUtr" placeholder="Enter Transaction ID (UTR)">
+            <button class="btn" style="background:var(--premium)" onclick="submitPayment()">UNLOCK NOW</button>
         </div>
     </div>
 
-    <div id="page-review" class="container">
-        <h2 style="color: var(--review)">💬 Star Reviews</h2>
-        <div class="card">
-            <input type="text" id="revAthlete" placeholder="Athlete Name">
-            <div class="star-rating" id="starInput">
-                <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
-            </div>
-            <textarea id="revMsg" placeholder="Feedback..."></textarea>
-            <button class="btn" style="background: var(--review)" onclick="submitReview()">SUBMIT REVIEW</button>
-        </div>
-        <div id="reviewWall"></div>
-    </div>
-
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <h3>Admin Settings</h3>
-            <label>Set Your UPI ID:</label>
-            <input type="text" id="adminUpi" placeholder="example@upi">
-            <label>Set Subscription Price (₹):</label>
-            <input type="number" id="adminPrice" placeholder="500">
-            <button class="btn" style="background:var(--practice)" onclick="saveAdminSettings()">UPDATE SETTINGS</button>
-            <button class="btn" style="background:#64748b; margin-top:5px;" onclick="closeAdmin()">CLOSE</button>
-        </div>
+    <div id="page-dash" class="container">
+        <h2>📊 Performance Dashboard</h2>
+        <div id="displayArea"></div>
     </div>
 
 <script>
-    // Firebase Setup
+    // Config & Setup
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let userID = localStorage.getItem('athleteTracker_ID') || 'user_v30_final';
+    
+    let userID = localStorage.getItem('athleteTracker_ID') || 'user_v32_final';
     let installDate = localStorage.getItem('install_date') || Date.now();
     localStorage.setItem('athleteTracker_ID', userID);
     localStorage.setItem('install_date', installDate);
 
-    // Navigation & Tabs
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -139,111 +100,94 @@
         if(id === 'page-reports') checkSubscription();
     }
 
-    // Trial & Subscription Logic
-    function checkSubscription() {
-        const elapsed = Date.now() - parseInt(installDate);
-        const daysUsed = Math.floor(elapsed / (1000 * 60 * 60 * 24));
-        const daysLeft = Math.max(0, 30 - daysUsed);
-        document.getElementById('trial-info').innerText = `Free Trial: ${daysLeft} days remaining`;
-
-        if (daysUsed >= 30) {
-            document.getElementById('reports-list').style.display = 'none';
-            document.getElementById('paywall-screen').style.display = 'block';
-            updatePaywall();
-        }
+    // AI Advice Generator
+    function getSmartAdvice(event) {
+        if(event.includes('Sprint') || event.includes('100m')) return "SPEED: Work on 'Wicket Runs' for stride frequency and high knees.";
+        if(event.includes('Jump')) return "POWER: Focus on explosive take-offs. Add 'Box Jumps' and 'Depth Jumps'.";
+        if(event.includes('Throw') || event.includes('Put')) return "STRENGTH: Focus on hip rotation and 'Med Ball Slams' for explosive release.";
+        return "Maintain consistent practice and focus on recovery.";
     }
 
-    function updatePaywall() {
-        const upi = localStorage.getItem('owner_upi') || 'yourname@upi';
-        const price = localStorage.getItem('sub_price') || '499';
-        const upiLink = `upi://pay?pa=${upi}&pn=EliteAthletePro&am=${price}&cu=INR`;
-        document.getElementById('payment-box').innerHTML = `
-            <p style="font-weight:bold; color:var(--premium)">Price: ₹${price}</p>
-            <a href="${upiLink}" class="pay-link">PAY VIA UPI (PhonePe/GPay)</a>
-            <p style="font-size:10px; margin-top:10px;">Send screenshot to coach after payment.</p>
-        `;
-    }
-
-    // Admin Access
-    let clickCount = 0;
-    function adminCheck() {
-        clickCount++;
-        if(clickCount >= 5) {
-            let pass = prompt("Enter Admin Password:");
-            if(pass === "1234") {
-                document.getElementById('adminModal').style.display = 'flex';
-                document.getElementById('adminUpi').value = localStorage.getItem('owner_upi') || '';
-                document.getElementById('adminPrice').value = localStorage.getItem('sub_price') || '499';
-            }
-            clickCount = 0;
-        }
-    }
-    function saveAdminSettings() {
-        localStorage.setItem('owner_upi', document.getElementById('adminUpi').value);
-        localStorage.setItem('sub_price', document.getElementById('adminPrice').value);
-        alert("Settings Updated!");
+    // Payment Logic
+    function submitPayment() {
+        const utr = document.getElementById('userUtr').value;
+        if(utr.length < 6) return alert("Enter valid Transaction ID");
+        localStorage.setItem('premium_unlocked', 'true');
+        db.ref(`${userID}/payments`).push({ utr, date: new Date().toLocaleString() });
+        alert("Payment Submitted! Reports Unlocked.");
         location.reload();
     }
-    function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
 
-    // Data Management
+    function checkSubscription() {
+        const isUnlocked = localStorage.getItem('premium_unlocked');
+        const daysUsed = Math.floor((Date.now() - parseInt(installDate)) / (1000*60*60*24));
+        if (isUnlocked === 'true' || daysUsed < 30) {
+            document.getElementById('reports-list').style.display = 'block';
+            document.getElementById('paywall-screen').style.display = 'none';
+        } else {
+            document.getElementById('reports-list').style.display = 'none';
+            document.getElementById('paywall-screen').style.display = 'block';
+            const upi = localStorage.getItem('owner_upi') || 'coach@upi';
+            document.getElementById('payment-box').innerHTML = `<a href="upi://pay?pa=${upi}&am=499&cu=INR" class="pay-link">PAY VIA UPI</a>`;
+        }
+    }
+
+    // Save Data
     function saveData(type) {
         const pre = type === 'Practice' ? 'p' : 'm';
         const name = document.getElementById(pre+'Name').value.trim();
         const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
         const date = document.getElementById(pre+'Date').value;
         const score = parseFloat(document.getElementById(pre+'Score').value);
-        if(!name || !date || isNaN(score)) return alert("Missing Data");
+        if(!name || !date || isNaN(score)) return alert("Fill all fields");
         db.ref(`${userID}/data/${name}/${event.replace(/\s/g,'')}`).push({ type, event, date, score, ts: Date.now() });
         document.getElementById(pre+'Score').value = '';
     }
 
-    function deletePoint(name, eKey, id) { if(confirm("Delete entry?")) db.ref(`${userID}/data/${name}/${eKey}/${id}`).remove(); }
-
-    // Rendering Graphs & Reports
+    // Display & Analysis
     db.ref(`${userID}/data`).on('value', snap => {
         const area = document.getElementById('displayArea');
-        const reportList = document.getElementById('reports-list');
-        area.innerHTML = ''; reportList.innerHTML = '';
+        const rList = document.getElementById('reports-list');
+        area.innerHTML = ''; rList.innerHTML = '';
         const data = snap.val(); if(!data) return;
 
         for(let name in data) {
             const card = document.createElement('div'); card.className = 'athlete-card';
             card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${name.replace(/\s/g,'')}"></div>`;
             area.appendChild(card);
+            let rHTML = `<div class="report-card"><h3>${name} Analysis</h3>`;
 
-            let rHTML = `<div class="report-card"><div class="grade-badge">A</div><h3>${name}</h3>`;
             for(let eKey in data[name]) {
-                const logs = Object.keys(data[name][eKey]).map(id => ({id, ...data[name][eKey][id]})).sort((a,b)=>a.ts - b.ts);
+                const logs = Object.values(data[name][eKey]).sort((a,b)=>a.ts - b.ts);
+                const latest = logs[logs.length-1];
+                rHTML += `<p><b>${latest.event}:</b> Last Score ${latest.score}</p>
+                          <div class="ai-box"><b>AI Coach:</b> ${getSmartAdvice(latest.event)}</div>`;
+                
                 const gCard = document.createElement('div'); gCard.className = 'graph-card';
-                gCard.innerHTML = `<small>${logs[0].event}</small><canvas id="c-${name.replace(/\s/g,'')}-${eKey}"></canvas>
-                <div style="font-size:11px; margin-top:10px;">${logs.map(l => `<div>${l.date}: ${l.score} <span class="del-x" onclick="deletePoint('${name}','${eKey}','${l.id}')">✕</span></div>`).reverse().join('')}</div>`;
+                gCard.innerHTML = `<small>${latest.event}</small><canvas id="c-${name.replace(/\s/g,'')}-${eKey}"></canvas>`;
                 document.getElementById(`sc-${name.replace(/\s/g,'')}`).appendChild(gCard);
-                rHTML += `<p style="font-size:12px;"><b>${logs[0].event}:</b> Stable. Last: ${logs[logs.length-1].score}</p>`;
-                const isTime = (logs[0].event.includes('m') || logs[0].event.includes('Sprint')) && !logs[0].event.includes('Jump');
-                setTimeout(() => { new Chart(document.getElementById(`c-${name.replace(/\s/g,'')}-${eKey}`), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb' }] }, options: { scales:{y:{reverse:isTime}, x:{display:false}}, plugins:{legend:{display:false}} } }); }, 100);
+                
+                setTimeout(() => {
+                    new Chart(document.getElementById(`c-${name.replace(/\s/g,'')}-${eKey}`), {
+                        type: 'line',
+                        data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.3 }] },
+                        options: { scales:{x:{display:false}}, plugins:{legend:{display:false}} }
+                    });
+                }, 100);
             }
             rHTML += `</div>`;
-            reportList.innerHTML += rHTML;
+            rList.innerHTML += rHTML;
         }
     });
 
-    // Review Logic
-    let currentRating = 0;
-    function setRating(n) { currentRating = n; const stars = document.getElementById('starInput').children; for(let i=0; i<5; i++) stars[i].className = i < n ? 'active' : ''; }
-    function submitReview() {
-        const athlete = document.getElementById('revAthlete').value;
-        const msg = document.getElementById('revMsg').value;
-        if(athlete && msg && currentRating > 0) {
-            db.ref(`${userID}/reviews`).push({ athlete, rating: currentRating, msg, date: new Date().toLocaleDateString() });
-            setRating(0); document.getElementById('revMsg').value = '';
+    // Admin Password Setting
+    function adminCheck() {
+        let p = prompt("Password:");
+        if(p === "1234") {
+            let u = prompt("Enter your UPI ID (e.g. name@upi):");
+            if(u) localStorage.setItem('owner_upi', u);
         }
     }
-    db.ref(`${userID}/reviews`).on('value', snap => {
-        const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-        Object.values(data).reverse().forEach(r => { wall.innerHTML += `<div class="card" style="border-left:5px solid var(--review)"><b>${r.athlete}</b><br><span style="color:#fbbf24">${'★'.repeat(r.rating)}</span><br>${r.msg}</div>`; });
-    });
 </script>
 </body>
 </html>
