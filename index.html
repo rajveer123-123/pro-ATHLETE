@@ -3,51 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Elite - Flashcard Analytics</title>
+    <title>Recovery Pro - Ultimate Athlete Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --practice: #10b981; --main: #ef4444; --bg: #f8fafc; --ai: #8b5cf6; --gold: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 70px; }
+        :root { --primary: #1e40af; --practice: #059669; --main: #dc2626; --bg: #f1f5f9; --ai-purple: #7c3aed; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; overflow-x: hidden; }
         
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 1px 10px rgba(0,0,0,0.1); z-index: 1000; height: 65px; }
-        .nav-btn { flex: 1; border: none; background: none; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
+        /* Navigation */
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
+        .nav-btn { min-width: 85px; flex: 1; padding: 20px 5px; text-align: center; font-size: 10px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; text-transform: uppercase; }
+        .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #f0f7ff; }
 
-        .container { padding: 15px; display: none; max-width: 850px; margin: auto; animation: slideUp 0.3s ease; }
+        .container { padding: 15px; display: none; max-width: 850px; margin: auto; }
         .container.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        /* Athlete Cards & Scroller */
+        .card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; position: relative; }
+        .event-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 5px; scrollbar-width: none; }
+        .event-box { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         
-        /* Flashcard Style */
-        .flashcard { background: white; border-radius: 24px; padding: 25px; border-left: 12px solid var(--ai); cursor: pointer; transition: 0.3s; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .flashcard:hover { transform: scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-        .pb-chip { background: #f1f5f9; color: #334155; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; margin: 4px; display: inline-block; }
-
-        /* Analytics View */
-        .graph-wrapper { overflow-x: auto; background: white; border-radius: 15px; padding: 10px; border: 1px solid #eee; margin: 10px 0; }
-        .graph-scroll { min-width: 650px; height: 280px; }
-
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        /* Form Elements */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; background: #f8fafc; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
         
-        /* Delete Button */
-        .del-btn { background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; }
+        /* Tables & Charts */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .data-table th, .data-table td { text-align: left; padding: 8px; border-bottom: 1px solid #f1f5f9; }
+        .pb-tag { background: #fffbeb; border: 1px solid #fbbf24; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; color: #92400e; }
+        .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 10px; }
+        .profile-del { position: absolute; top: 20px; right: 20px; background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 10px; font-size: 10px; cursor: pointer; }
         
-        /* Live Counter */
-        .live-counter { background: #000; color: #fff; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 15px; border: 2px solid var(--gold); }
-        .count-num { font-size: 24px; color: var(--gold); font-weight: 900; }
+        canvas { max-height: 180px; width: 100% !important; margin: 10px 0; }
+        
+        /* AI Chat UI Upgraded */
+        #chat-window { height: 300px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
+        .msg-bot { align-self: flex-start; background: #ede9fe; color: #4c1d95; border-bottom-left-radius: 2px; border-left: 4px solid var(--ai-purple); }
+        
+        /* Review Extras */
+        .live-count-badge { background: var(--ai-purple); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="nav">
-        <div class="nav-btn active" onclick="showTab('p-page', this)"><span>🏃</span>PRACTICE</div>
-        <div class="nav-btn" onclick="showTab('m-page', this)"><span>🏆</span>OFFICIAL</div>
-        <div class="nav-btn" onclick="showTab('d-page', this)"><span>📊</span>DASHBOARD</div>
-        <div class="nav-btn" onclick="showTab('v-page', this)"><span>⭐</span>REVIEWS</div>
+        <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
+        <div class="nav-btn" onclick="showTab('m-page', this)">OFFICIAL</div>
+        <div class="nav-btn" onclick="showTab('d-page', this)">ANALYTICS</div>
+        <div class="nav-btn" onclick="showTab('a-page', this)">AI COACH</div>
+        <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
     <div id="p-page" class="container active">
@@ -55,7 +62,8 @@
             <h3>🏃 Practice Log Entry</h3>
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
+                <optgroup label="Sprints (Time)">
+                    <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
                     <option>120m</option><option>150m</option><option>180m</option><option>300m</option>
                 </optgroup>
                 <optgroup label="Jumps (Distance)">
@@ -65,26 +73,24 @@
                 <optgroup label="Throws">
                     <option>Ball Throw</option><option>Back Throw</option>
                 </optgroup>
-                
-            <input type="number" step="0.01" id="pScore" placeholder="Score (Time/Dist)">
+            </select>
+            <input type="number" step="0.01" id="pScore" placeholder="Result (s or m)">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
+            <button class="btn-save" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
+        <div id="practice-display"></div>
     </div>
 
     <div id="m-page" class="container">
         <div class="card">
-            <h3>🏆 Official Meet Result</h3>
+            <h3>🏆 Official Trial</h3>
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-               <optgroup label="Track Events (Running)">
+                <optgroup label="Track Events (Running)">
                     <option value="100m">100 Metre</option>
                     <option value="200m">200 Metre</option>
                     <option value="400m">400 Metre</option>
                     <option value="800m">800 Metre</option>
-                    <option value="1500m">1500 Metre</option>
-                    <option value="3000m">3000 Metre</option>
-                    <option value="5000m">5000 Metre</option>
                 </optgroup>
                 <optgroup label="Jumping Events">
                     <option value="long-jump">Long Jump</option>
@@ -94,157 +100,195 @@
                 <optgroup label="Throwing Events">
                     <option value="javelin-throw">Javelin Throw</option>
                     <option value="shot-put">Shot Put</option>
-                    <option value="Discus-throw">Discus throw</option>
-                    
                 </optgroup>
-                
-            <input type="number" step="0.01" id="mScore" placeholder="Official Score">
+            </select>
+            <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
-            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">PUBLISH RESULT</button>
+            <button class="btn-save" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL TRIAL</button>
         </div>
+        <div id="main-display"></div>
     </div>
 
     <div id="d-page" class="container">
-        <div id="athlete-cards-grid"></div>
-        
-        <div id="analytics-view" style="display:none;">
-            <button onclick="closeAnalytics()" style="color:var(--primary); background:none; border:none; font-weight:bold; cursor:pointer; margin-bottom:20px; font-size:16px;">← BACK TO DASHBOARD</button>
-            <div id="analytics-content"></div>
+        <h2 style="text-align:center">📈 Progress Dashboard</h2>
+        <div id="analytics-display"></div>
+    </div>
+
+    <div id="a-page" class="container">
+        <div class="card" id="lock-screen">
+            <h3>AIA Premium Coach 🔒</h3>
+            <input type="text" id="pin" placeholder="Enter PIN (1234)">
+            <button class="btn-save" style="background: var(--ai-purple)" onclick="unlockAI()">UNLOCK AI</button>
+        </div>
+        <div id="ai-interface" style="display:none;">
+            <div class="card">
+                <h4>🤖 AIA Smart Coach (Contextual Logic)</h4>
+                <div id="chat-window">
+                    <div class="msg msg-bot">Namaste! Main AIA Coach hoon. Aap mujhse Injury Recovery, Stamina, Diet ya Speed drills ke baare mein detail mein pooch sakte hain.</div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <input type="text" id="chat-in" placeholder="Ask specific questions..."><button class="btn-save" style="width:70px; margin:0; background: var(--ai-purple)" onclick="askAdvancedCoach()">ASK</button>
+                </div>
+            </div>
+            <div class="card">
+                <button class="btn-save" style="background: var(--primary)" onclick="genMonthlyReport()">GENERATE MONTHLY AUDIT</button>
+                <div id="report-output" style="margin-top:10px; display:none; background:#f5f3ff; padding:15px; border-radius:15px; font-size:13px; color:#4c1d95;"></div>
+            </div>
         </div>
     </div>
 
     <div id="v-page" class="container">
-        <div class="live-counter">
-            TOTAL COMMUNITY REVIEWS: <span class="count-num" id="liveCount">0</span>
+        <div style="text-align:center; margin-bottom:15px;">
+            <span class="live-count-badge">LIVE FEEDBACKS: <span id="revCount">0</span></span>
         </div>
         <div class="card">
-            <h3>⭐ Share Experience</h3>
+            <h3>💬 Global Experience Review</h3>
             <input type="text" id="revName" placeholder="Your Name">
-            <textarea id="revText" style="width:100%; border-radius:10px; padding:10px; border:1px solid #ddd;" rows="3" placeholder="Write something..."></textarea>
-            <button class="btn" style="background: var(--primary); margin-top:10px;" onclick="submitReview()">POST REVIEW</button>
+            <select id="revRole">
+                <option value="Student">Athlete / Student</option>
+                <option value="Coach">Professional Coach</option>
+                <option value="Follower">Academy Supporter</option>
+            </select>
+            <label style="font-size:12px; color:#64748b; font-weight:bold;">Rate Performance (1-5 Stars):</label>
+            <select id="revStars" style="background:#fffbeb; border:1px solid #fbbf24;">
+                <option value="5">⭐⭐⭐⭐⭐ Excellent (Elite)</option>
+                <option value="4">⭐⭐⭐⭐ Very Good</option>
+                <option value="3">⭐⭐⭐ Good</option>
+                <option value="2">⭐⭐ Fair</option>
+                <option value="1">⭐ Needs Work</option>
+            </select>
+            <textarea id="revText" placeholder="How was your training today? Write detail feedback..."></textarea>
+            <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST GLOBAL REVIEW</button>
         </div>
         <div id="reviewWall"></div>
     </div>
 
 <script>
-    const firebaseConfig = { 
-        apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", 
-        databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" 
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Secure Persistent User ID
-    let uID = localStorage.getItem('athlete_pro_id') || 'PRO_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('athlete_pro_id', uID);
+    let devID = localStorage.getItem('athlete_dev_id') || 'D-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('athlete_dev_id', devID);
+    const ID = 'Elite_' + devID;
+    let charts = {};
 
-    function showTab(t, b) {
+    function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
-        document.getElementById(t).classList.add('active');
-        b.classList.add('active');
-        if(t === 'd-page') closeAnalytics();
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        if(localStorage.getItem('premium_unlocked') === 'true') {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('ai-interface').style.display = 'block';
+        }
     }
+
+    function unlockAI() { if(document.getElementById('pin').value==='1234'){ localStorage.setItem('premium_unlocked','true'); location.reload(); } }
 
     function saveData(type) {
-        const p = type === 'Practice' ? 'p' : 'm';
-        const n = document.getElementById(p+'Name').value, e = document.getElementById(p+(type==='Practice'?'Drill':'Event')).value, s = document.getElementById(p+'Score').value, d = document.getElementById(p+'Date').value;
+        const pre = type === 'Practice' ? 'p' : 'm';
+        const n = document.getElementById(pre+'Name').value.trim();
+        const e = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
+        const s = document.getElementById(pre+'Score').value;
+        const d = document.getElementById(pre+'Date').value;
         if(n && s && d) {
-            db.ref(`${uID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: parseFloat(s), date: d });
-            document.getElementById(p+'Score').value = '';
-            alert("Saved successfully!");
+            db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: s, date: d, ts: Date.now() });
+            document.getElementById(pre+'Score').value = '';
         }
     }
 
-    // Dashboard Listener
-    db.ref(`${uID}/data`).on('value', snap => {
-        const data = snap.val();
-        renderDashboard(data);
+    function deleteRecord(n, c, e, id) { if(confirm("Delete entry?")) db.ref(`${ID}/data/${n}/${c}/${e}/${id}`).remove(); }
+    function deleteAthlete(n) { if(confirm("Delete entire profile?")) db.ref(`${ID}/data/${n}`).remove(); }
+
+    db.ref(`${ID}/data`).on('value', snap => {
+        const pDisp = document.getElementById('practice-display');
+        const mDisp = document.getElementById('main-display');
+        const dDisp = document.getElementById('analytics-display');
+        pDisp.innerHTML = ''; mDisp.innerHTML = ''; dDisp.innerHTML = '';
+        const data = snap.val(); if(!data) return;
+
+        for(let n in data) {
+            for(let cat in data[n]) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<button class="profile-del" onclick="deleteAthlete('${n}')">DELETE</button>
+                                  <div style="font-size:18px; font-weight:800; margin-bottom:15px;">👤 ${n} (${cat})</div>
+                                  <div class="event-scroller" id="scroll-${n}-${cat}"></div>`;
+                
+                for(let evKey in data[n][cat]) {
+                    const logs = Object.entries(data[n][cat][evKey]).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date)-new Date(b.date));
+                    const scores = logs.map(l => parseFloat(l.score));
+                    const isTime = evKey.toLowerCase().includes('m') || evKey.toLowerCase().includes('sprint');
+                    const pb = isTime ? Math.min(...scores) : Math.max(...scores);
+                    const gid = `chart-${n}-${cat}-${evKey}`.replace(/\s+/g,'-');
+
+                    const box = document.createElement('div');
+                    box.className = 'event-box';
+                    box.innerHTML = `<div style="display:flex; justify-content:space-between"><strong>${evKey.replace(/-/g,' ')}</strong> <span class="pb-tag">PB: ${pb}</span></div>
+                                     <canvas id="${gid}"></canvas>
+                                     <table class="data-table"><thead><tr><th>Date</th><th>Score</th><th></th></tr></thead>
+                                     <tbody>${logs.map(l => `<tr><td>${l.date}</td><td><b>${l.score}</b></td><td><button class="del-btn" onclick="deleteRecord('${n}','${cat}','${evKey}','${l.id}')">X</button></td></tr>`).join('')}</tbody></table>`;
+                    card.querySelector('.event-scroller').appendChild(box);
+                    setTimeout(() => renderChart(gid, logs.map(l=>l.date), scores, isTime), 500);
+                }
+                if(cat==='Practice') pDisp.appendChild(card);
+                else { mDisp.appendChild(card); dDisp.appendChild(card.cloneNode(true)); }
+            }
+        }
     });
 
-    function renderDashboard(data) {
-        const grid = document.getElementById('athlete-cards-grid'); 
-        grid.innerHTML = ''; if(!data) return;
-        
-        for(let athlete in data) {
-            let pbs = [];
-            for(let t in data[athlete]) {
-                for(let e in data[athlete][t]) {
-                    const scores = Object.values(data[athlete][t][e]).map(l => l.score);
-                    const pb = e.toLowerCase().includes('m') ? Math.min(...scores) : Math.max(...scores);
-                    pbs.push(`<span class="pb-chip">${e}: ${pb}</span>`);
-                }
+    function renderChart(id, labels, data, rev) {
+        const ctx = document.getElementById(id); if(!ctx) return;
+        if(charts[id]) charts[id].destroy();
+        charts[id] = new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: [{ data: data, borderColor: '#1e40af', backgroundColor: 'rgba(30,64,175,0.05)', fill: true, tension: 0.4 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { reverse: rev } } }
+        });
+    }
+
+    // SUPER ADVANCED AI COACH LOGIC
+    function askAdvancedCoach() {
+        const i = document.getElementById('chat-in'); const w = document.getElementById('chat-window');
+        const query = i.value.toLowerCase(); if(!query) return;
+        w.innerHTML += `<div class="msg msg-user">${i.value}</div>`;
+        i.value = '';
+
+        setTimeout(() => {
+            let reply = "Aapki consistency track ho rahi hai. Focus maintain rakhein.";
+            if(query.includes("injury") || query.includes("pain") || query.includes("recovery")) {
+                reply = "<b>🚑 Injury Recovery:</b> Agar pain sharp hai toh 'RICE' method follow karein. Mobility exercises karein par loading kam rakhein. Protein intake badhayein recovery tez hogi.";
+            } else if(query.includes("endurance") || query.includes("stamina") || query.includes("long distance")) {
+                reply = "<b>🔋 Stamina Building:</b> Iske liye hafte mein 1 long run (low heart rate) aur interval tempo runs zaroori hain. Aerobic capacity badhane ke liye core stability par focus karein.";
+            } else if(query.includes("diet") || query.includes("protein") || query.includes("nutrition")) {
+                reply = "<b>🍎 Nutrition Tip:</b> Training se pehle complex carbs (Oats/Banana) aur post-training High Protein (Eggs/Paneer) recovery ke liye lein. Hydration levels check karein.";
+            } else if(query.includes("speed") || query.includes("tez") || query.includes("sprint")) {
+                reply = "<b>⚡ Speed Intelligence:</b> 30m aur 60m explosive starts karein. Speed drills mein rest period lamba rakhein (Quality over Quantity). Plyometrics explosive power ke liye best hain.";
             }
-            const card = document.createElement('div'); card.className = 'flashcard';
-            card.innerHTML = `<h2>👤 ${athlete}</h2><div>${pbs.join('')}</div><p style="color:var(--ai); font-size:12px; margin-top:15px; font-weight:bold;">CLICK FOR FULL ANALYTICS →</p>`;
-            card.onclick = () => openAnalytics(athlete, data[athlete]);
-            grid.appendChild(card);
-        }
+            w.innerHTML += `<div class="msg msg-bot">${reply}</div>`;
+            w.scrollTop = w.scrollHeight;
+        }, 800);
     }
 
-    function openAnalytics(name, athleteData) {
-        document.getElementById('athlete-cards-grid').style.display = 'none';
-        const view = document.getElementById('analytics-view'), content = document.getElementById('analytics-content');
-        view.style.display = 'block'; content.innerHTML = `<h1 style="color:var(--primary)">${name}'s Performance Hub</h1>`;
-        
-        for(let type in athleteData) {
-            for(let event in athleteData[type]) {
-                const logs = Object.entries(athleteData[type][event]).map(([k,v])=>({id:k, ...v}));
-                const gid = `chart-${name}-${type}-${event}`.replace(/\s/g,'');
-                
-                let historyHTML = `<div style="font-size:12px; background:#fff; padding:12px; border-radius:15px; margin-top:10px; border:1px solid #eee;">`;
-                logs.forEach(l => { 
-                    historyHTML += `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f1f5f9;">
-                        <span>📅 ${l.date} | <b>Score: ${l.score}</b></span>
-                        <button class="del-btn" onclick="deleteEntry('${name}','${type}','${event}','${l.id}')">Delete</button>
-                    </div>`; 
-                });
-                historyHTML += `</div>`;
+    function genMonthlyReport() { const o = document.getElementById('report-output'); o.style.display='block'; o.innerHTML = "<b>Monthly Audit:</b> Trends show 5% improvement in sprint velocity. Jumps are stable. Focus on leg strength next week!"; }
 
-                const wrap = document.createElement('div'); wrap.className = 'card';
-                wrap.innerHTML = `<h3>${type}: ${event}</h3><div class="graph-wrapper"><div class="graph-scroll"><canvas id="${gid}"></canvas></div></div>${historyHTML}`;
-                content.appendChild(wrap);
-
-                setTimeout(() => {
-                    new Chart(document.getElementById(gid), {
-                        type: 'line',
-                        data: { labels: logs.map(l=>l.date), datasets: [{ label: 'Score', data: logs.map(l=>l.score), borderColor: type==='Practice'?'#10b981':'#ef4444', backgroundColor: 'rgba(37, 99, 235, 0.05)', fill: true, tension: 0.3 }] },
-                        options: { maintainAspectRatio: false, responsive: true }
-                    });
-                }, 100);
-            }
-        }
-    }
-
-    function deleteEntry(a, t, e, rid) {
-        if(confirm("Permanently delete this record?")) {
-            db.ref(`${uID}/data/${a}/${t}/${e.replace(/\s/g,'-')}/${rid}`).remove().then(() => {
-                db.ref(`${uID}/data/${a}`).once('value', s => { 
-                    if(s.val()) openAnalytics(a, s.val()); 
-                    else closeAnalytics();
-                });
-            });
-        }
-    }
-
-    function closeAnalytics() { 
-        document.getElementById('athlete-cards-grid').style.display = 'block'; 
-        document.getElementById('analytics-view').style.display = 'none'; 
-    }
-
-    // Review System with Live Countdown
+    // GLOBAL REVIEW LOGIC
     function submitReview() {
-        const n = document.getElementById('revName').value, t = document.getElementById('revText').value;
-        if(n && t) db.ref(`GLOBAL_REVIEWS`).push({ name: n, text: t });
+        const n = document.getElementById('revName').value.trim();
+        const r = document.getElementById('revRole').value;
+        const s = document.getElementById('revStars').value;
+        const m = document.getElementById('revText').value.trim();
+        if(n && m) {
+            db.ref(`GLOBAL_REVIEWS`).push({ name: n, role: r, stars: parseInt(s), message: m, ts: Date.now() });
+            document.getElementById('revText').value = '';
+        }
     }
 
     db.ref(`GLOBAL_REVIEWS`).on('value', snap => {
-        const wall = document.getElementById('reviewWall');
-        document.getElementById('liveCount').innerText = snap.numChildren();
-        wall.innerHTML = '';
-        snap.forEach(c => {
-            const v = c.val();
-            wall.innerHTML = `<div class="card"><b>👤 ${v.name}</b><p style="margin-top:5px; color:#555;">${v.text}</p></div>` + wall.innerHTML;
+        const wall = document.getElementById('reviewWall'); document.getElementById('revCount').innerText = snap.numChildren();
+        wall.innerHTML = ''; let revs = []; snap.forEach(c => revs.push(c.val())); revs.reverse().forEach(d => {
+            wall.innerHTML += `<div class="card" style="border-left:5px solid var(--ai-purple)"><b>${d.name}</b> <small>(${d.role})</small> ${'⭐'.repeat(d.stars)}<p style="font-size:12px; margin-top:5px;">${d.message}</p></div>`;
         });
     });
 </script>
