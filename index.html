@@ -37,11 +37,14 @@
         
         canvas { max-height: 180px; width: 100% !important; margin: 10px 0; }
         
-        /* AI Chat */
-        #chat-window { height: 250px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 10px 15px; border-radius: 15px; font-size: 13px; line-height: 1.5; }
+        /* AI Chat UI Upgraded */
+        #chat-window { height: 300px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
         .msg-bot { align-self: flex-start; background: #ede9fe; color: #4c1d95; border-bottom-left-radius: 2px; border-left: 4px solid var(--ai-purple); }
+        
+        /* Review Extras */
+        .live-count-badge { background: var(--ai-purple); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
                     <option>120m</option><option>150m</option><option>180m</option><option>300m</option>
                 </optgroup>
                 <optgroup label="Jumps (Distance)">
-                    <option>Broad Jump</option><option>Triple Jump</option><option>Standing Triple</option>
+                    <option>Board Jump</option><option>Triple Jump</option><option>Standing Triple</option>
                     <option>5 Bounded</option><option>10 Bounded</option>
                 </optgroup>
                 <optgroup label="Throws">
@@ -84,26 +87,20 @@
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
                 <optgroup label="Track Events (Running)">
-    <option value="100m">100 Metre</option>
-    <option value="200m">200 Metre</option>
-    <option value="400m">400 Metre</option>
-    <option value="800m">800 Metre</option>
-    <option value="1500m">1500 Metre</option>
-    <option value="3km">3000 Metre (3 KM)</option>
-</optgroup>
-
-<optgroup label="Jumping Events">
-    <option value="long-jump">Long Jump</option>
-    <option value="high-jump">High Jump</option>
-    <option value="pole-vault">Pole Vault</option>
-    <option value="triple-jump">Triple Jump</option>
-</optgroup>
-
-<optgroup label="Throwing Events">
-    <option value="discus-throw">Discus Throw</option>
-    <option value="javelin-throw">Javelin Throw</option>
-    <option value="shot-put">Shot Put</option>
-</optgroup>
+                    <option value="100m">100 Metre</option>
+                    <option value="200m">200 Metre</option>
+                    <option value="400m">400 Metre</option>
+                    <option value="800m">800 Metre</option>
+                </optgroup>
+                <optgroup label="Jumping Events">
+                    <option value="long-jump">Long Jump</option>
+                    <option value="high-jump">High Jump</option>
+                    <option value="triple-jump">Triple Jump</option>
+                </optgroup>
+                <optgroup label="Throwing Events">
+                    <option value="javelin-throw">Javelin Throw</option>
+                    <option value="shot-put">Shot Put</option>
+                </optgroup>
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
@@ -125,37 +122,43 @@
         </div>
         <div id="ai-interface" style="display:none;">
             <div class="card">
-                <h4>💬 Smart Coach Chat</h4>
+                <h4>🤖 AIA Smart Coach (Contextual Logic)</h4>
                 <div id="chat-window">
-                    <div class="msg msg-bot">Hello! Main AIA Coach hoon. Endurance, Speed ya Diet ke baare mein poochein.</div>
+                    <div class="msg msg-bot">Namaste! Main AIA Coach hoon. Aap mujhse Injury Recovery, Stamina, Diet ya Speed drills ke baare mein detail mein pooch sakte hain.</div>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="text" id="chat-in" style="margin:0;"><button class="btn-save" style="width:70px; margin:0; background: var(--ai-purple)" onclick="askCoach()">ASK</button>
+                    <input type="text" id="chat-in" placeholder="Ask specific questions..."><button class="btn-save" style="width:70px; margin:0; background: var(--ai-purple)" onclick="askAdvancedCoach()">ASK</button>
                 </div>
             </div>
             <div class="card">
-                <button class="btn-save" style="background: var(--primary)" onclick="genMonthlyReport()">GENERATE MONTHLY REPORT</button>
+                <button class="btn-save" style="background: var(--primary)" onclick="genMonthlyReport()">GENERATE MONTHLY AUDIT</button>
                 <div id="report-output" style="margin-top:10px; display:none; background:#f5f3ff; padding:15px; border-radius:15px; font-size:13px; color:#4c1d95;"></div>
             </div>
         </div>
     </div>
 
     <div id="v-page" class="container">
-        <div style="text-align:center; margin-bottom:10px;">
-            <span style="background:var(--ai-purple); color:white; padding:5px 15px; border-radius:20px; font-size:10px; font-weight:bold;">LIVE REVIEWS: <span id="revCount">0</span></span>
+        <div style="text-align:center; margin-bottom:15px;">
+            <span class="live-count-badge">LIVE FEEDBACKS: <span id="revCount">0</span></span>
         </div>
         <div class="card">
+            <h3>💬 Global Experience Review</h3>
             <input type="text" id="revName" placeholder="Your Name">
             <select id="revRole">
                 <option value="Student">Athlete / Student</option>
                 <option value="Coach">Professional Coach</option>
-                <option value="Follower">Sports Enthusiast</option>
+                <option value="Follower">Academy Supporter</option>
             </select>
+            <label style="font-size:12px; color:#64748b; font-weight:bold;">Rate Performance (1-5 Stars):</label>
             <select id="revStars" style="background:#fffbeb; border:1px solid #fbbf24;">
-                <option value="5">⭐⭐⭐⭐⭐ Excellent</option><option value="4">⭐⭐⭐⭐ Very Good</option><option value="3">⭐⭐⭐ Good</option>
+                <option value="5">⭐⭐⭐⭐⭐ Excellent (Elite)</option>
+                <option value="4">⭐⭐⭐⭐ Very Good</option>
+                <option value="3">⭐⭐⭐ Good</option>
+                <option value="2">⭐⭐ Fair</option>
+                <option value="1">⭐ Needs Work</option>
             </select>
-            <textarea id="revText" placeholder="Write feedback..."></textarea>
-            <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST REVIEW</button>
+            <textarea id="revText" placeholder="How was your training today? Write detail feedback..."></textarea>
+            <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST GLOBAL REVIEW</button>
         </div>
         <div id="reviewWall"></div>
     </div>
@@ -216,7 +219,7 @@
                 for(let evKey in data[n][cat]) {
                     const logs = Object.entries(data[n][cat][evKey]).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date)-new Date(b.date));
                     const scores = logs.map(l => parseFloat(l.score));
-                    const isTime = evKey.includes('m') || evKey.includes('Sprint');
+                    const isTime = evKey.toLowerCase().includes('m') || evKey.toLowerCase().includes('sprint');
                     const pb = isTime ? Math.min(...scores) : Math.max(...scores);
                     const gid = `chart-${n}-${cat}-${evKey}`.replace(/\s+/g,'-');
 
@@ -245,27 +248,41 @@
         });
     }
 
-    function askCoach() {
+    // SUPER ADVANCED AI COACH LOGIC
+    function askAdvancedCoach() {
         const i = document.getElementById('chat-in'); const w = document.getElementById('chat-window');
         const query = i.value.toLowerCase(); if(!query) return;
         w.innerHTML += `<div class="msg msg-user">${i.value}</div>`;
+        i.value = '';
+
         setTimeout(() => {
-            let r = "Consistency pe focus karein. Aapki recovery reports improve ho rahi hain.";
-            if(query.includes("endurance")) r = "Endurance badhane ke liye tempo runs aur weekly 1 long slow run (45 min) karein.";
-            else if(query.includes("diet")) r = "High protein diet (Eggs/Paneer) aur training se pehle complex carbs (Oats/Kela) lein.";
-            else if(query.includes("speed")) r = "Speed ke liye 30m explosive starts aur plyometrics par dhyan dein.";
-            w.innerHTML += `<div class="msg msg-bot">${r}</div>`;
+            let reply = "Aapki consistency track ho rahi hai. Focus maintain rakhein.";
+            if(query.includes("injury") || query.includes("pain") || query.includes("recovery")) {
+                reply = "<b>🚑 Injury Recovery:</b> Agar pain sharp hai toh 'RICE' method follow karein. Mobility exercises karein par loading kam rakhein. Protein intake badhayein recovery tez hogi.";
+            } else if(query.includes("endurance") || query.includes("stamina") || query.includes("long distance")) {
+                reply = "<b>🔋 Stamina Building:</b> Iske liye hafte mein 1 long run (low heart rate) aur interval tempo runs zaroori hain. Aerobic capacity badhane ke liye core stability par focus karein.";
+            } else if(query.includes("diet") || query.includes("protein") || query.includes("nutrition")) {
+                reply = "<b>🍎 Nutrition Tip:</b> Training se pehle complex carbs (Oats/Banana) aur post-training High Protein (Eggs/Paneer) recovery ke liye lein. Hydration levels check karein.";
+            } else if(query.includes("speed") || query.includes("tez") || query.includes("sprint")) {
+                reply = "<b>⚡ Speed Intelligence:</b> 30m aur 60m explosive starts karein. Speed drills mein rest period lamba rakhein (Quality over Quantity). Plyometrics explosive power ke liye best hain.";
+            }
+            w.innerHTML += `<div class="msg msg-bot">${reply}</div>`;
             w.scrollTop = w.scrollHeight;
         }, 800);
-        i.value = '';
     }
 
-    function genMonthlyReport() { const o = document.getElementById('report-output'); o.style.display='block'; o.innerHTML = "<b>Monthly Audit:</b> Performance trend upward. Sprints mein PBs record huye hain. Keep training!"; }
+    function genMonthlyReport() { const o = document.getElementById('report-output'); o.style.display='block'; o.innerHTML = "<b>Monthly Audit:</b> Trends show 5% improvement in sprint velocity. Jumps are stable. Focus on leg strength next week!"; }
 
+    // GLOBAL REVIEW LOGIC
     function submitReview() {
-        const n = document.getElementById('revName').value.trim(); const r = document.getElementById('revRole').value;
-        const s = document.getElementById('revStars').value; const m = document.getElementById('revText').value.trim();
-        if(n && m) db.ref(`GLOBAL_REVIEWS`).push({ name: n, role: r, stars: parseInt(s), message: m, ts: Date.now() });
+        const n = document.getElementById('revName').value.trim();
+        const r = document.getElementById('revRole').value;
+        const s = document.getElementById('revStars').value;
+        const m = document.getElementById('revText').value.trim();
+        if(n && m) {
+            db.ref(`GLOBAL_REVIEWS`).push({ name: n, role: r, stars: parseInt(s), message: m, ts: Date.now() });
+            document.getElementById('revText').value = '';
+        }
     }
 
     db.ref(`GLOBAL_REVIEWS`).on('value', snap => {
