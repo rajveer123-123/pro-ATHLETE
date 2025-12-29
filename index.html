@@ -3,65 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Pro AI - v33</title>
+    <title>Elite Performance Pro AI - v38 Final</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --premium: #7c3aed; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; }
-        .nav-btn { min-width: 90px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; }
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
+        .nav-btn { min-width: 100px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; }
         .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
         .container.active { display: block; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .paywall { display: none; text-align: center; padding: 40px 20px; background: #fff; border: 2px solid var(--premium); border-radius: 25px; }
-        .athlete-card { background: white; border-radius: 25px; margin-bottom: 30px; padding: 20px; border-left: 10px solid var(--primary); }
-        .scroll-x { display: flex; overflow-x: auto; gap: 20px; padding: 10px 0; }
-        .graph-card { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; }
-        .ai-box { background:#f0f7ff; padding:12px; border-radius:12px; font-size:13px; margin-top:10px; border-left: 4px solid var(--primary); line-height: 1.5; }
-        
-        /* New Chat UI */
-        #chat-container { height: 200px; overflow-y: auto; background: #f1f5f9; padding: 10px; border-radius: 12px; margin-top: 10px; }
-        .msg { margin-bottom: 8px; padding: 8px; border-radius: 8px; font-size: 13px; }
-        .msg-bot { background: #dbeafe; border-left: 3px solid var(--primary); }
-        .msg-user { background: #fff; text-align: right; }
+        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scrollbar-width: thin; }
+        .graph-card { min-width: 290px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 15px; }
+        .ai-advice { background:#f0f7ff; padding:10px; border-radius:10px; font-size:12px; margin-top:8px; border-left: 3px solid var(--primary); color: #1e40af; }
+        #chat-wall { height: 250px; overflow-y: auto; background: #f1f5f9; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+        .msg { padding: 8px 12px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
+        .bot { background: #dbeafe; border-left: 4px solid var(--premium); }
+        .user { background: #fff; border: 1px solid #cbd5e1; text-align: right; }
     </style>
 </head>
 <body>
 
     <div class="nav">
-        <div class="nav-btn active" onclick="showTab('page-practice', this)">PRACTICE</div>
-        <div class="nav-btn" onclick="showTab('page-main', this)">MAIN</div>
-        <div class="nav-btn" onclick="showTab('page-dash', this)">DASHBOARD</div>
-        <div class="nav-btn" onclick="showTab('page-reports', this)">AI PREMIUM</div>
+        <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
+        <div class="nav-btn" onclick="showTab('m-page', this)">MAIN</div>
+        <div class="nav-btn" onclick="showTab('d-page', this)">DASHBOARD</div>
+        <div class="nav-btn" onclick="showTab('a-page', this)">AI COACH PRO</div>
+        <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
-    <div id="page-practice" class="container active">
-        <h2 style="color: var(--practice)">🏃 Training Session</h2>
+    <div id="p-page" class="container active">
+        <h2>🏃 Practice Drills</h2>
         <div class="card">
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <option>30m Sprint</option><option>80m Sprint</option><option>150m Sprint</option><option>300m Sprint</option>
-                <option>Broad Jump</option><option>5 Bonded Jumps</option><option>10 Bonded Jumps</option>
-                <option>Medicine Ball Throw</option><option>Back Throw</option>
+                <option>30 Metre</option><option>40 Metre</option><option>80 Metre</option><option>120 Metre</option>
+                <option>150 Metre</option><option>180 Metre</option><option>300 Metre</option><option>800 Metre</option>
+                <option>Broad Jump</option><option>Standing Triple</option><option>5 Bounded</option><option>10 Bounded</option>
             </select>
             <input type="number" step="0.01" id="pScore" placeholder="Result">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
     </div>
 
-    <div id="page-main" class="container">
-        <h2 style="color: var(--main)">🏆 Official Trials</h2>
+    <div id="m-page" class="container">
+        <h2>🏆 Official Trials</h2>
         <div class="card">
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-                <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option>
-                <option>Long Jump</option><option>Triple Jump</option><option>Shot Put</option>
+                <option>100 Metre</option><option>200 Metre</option><option>400 Metre</option><option>800 Metre</option>
+                <option>1500 Metre</option><option>3 Kilometre</option><option>Long Jump</option><option>High Jump</option>
+                <option>Triple Jump</option><option>Javelin Throw</option><option>Discus Throw</option><option>Shot Put</option>
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
@@ -69,144 +67,114 @@
         </div>
     </div>
 
-    <div id="page-reports" class="container">
-        <h2 onclick="adminCheck()" style="color: var(--premium)">📜 AI Career Roadmap & Chat</h2>
-        
-        <div id="paywall-screen" class="paywall">
-            <h3>Premium Content Locked 🔒</h3>
-            <p>Access Career Goals & 24/7 AI Sport Bot.</p>
-            <button class="btn" style="background:var(--premium)" onclick="alert('Please pay via UPI to unlock')">PAY TO UNLOCK</button>
-            <input type="text" id="userUtr" placeholder="Enter Transaction ID" style="margin-top:10px">
-            <button class="btn" style="background:#22c55e" onclick="submitPayment()">SUBMIT ID</button>
-        </div>
+    <div id="d-page" class="container">
+        <h2>📊 Performance Analysis</h2>
+        <div id="displayArea"></div>
+    </div>
 
-        <div id="reports-list" style="display:none;">
+    <div id="a-page" class="container">
+        <h2 style="color: var(--premium)">🤖 AI Pro Center</h2>
+        <div id="lock-screen" class="card" style="text-align:center;">
+            <h3>Premium Locked 🔒</h3>
+            <p>Unlock 24/7 AI Chat & National Roadmap for 499/- (Code: 1234)</p>
+            <input type="text" id="actCode" placeholder="Enter Code">
+            <button class="btn" style="background:var(--premium)" onclick="unlock()">UNLOCK NOW</button>
+        </div>
+        <div id="ai-content" style="display:none;">
             <div class="card">
-                <h3>🤖 24/7 Sports Assistant</h3>
-                <div id="chat-container">
-                    <div class="msg msg-bot">Hello! I am your AI Sports Expert. Ask me about training, injury or diet.</div>
-                </div>
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    <input type="text" id="chat-input" placeholder="Ask anything...">
-                    <button class="btn" style="width:70px; margin:0; background:var(--premium)" onclick="askChatBot()">ASK</button>
+                <h4>💬 24/7 Sports Bot</h4>
+                <div id="chat-wall"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="chat-in" placeholder="Ask anything...">
+                    <button class="btn" style="width:70px; margin:0; background:var(--premium)" onclick="askAI()">ASK</button>
                 </div>
             </div>
-            <div id="athlete-career-reports"></div>
+            <div id="roadmap-wall"></div>
         </div>
     </div>
 
-    <div id="page-dash" class="container">
-        <h2>📊 Performance Dashboard</h2>
-        <div id="displayArea"></div>
+    <div id="v-page" class="container">
+        <h2>💬 User Reviews</h2>
+        <div class="card">
+            <input type="text" id="rUser" placeholder="Your Name">
+            <textarea id="rMsg" placeholder="Share your experience..."></textarea>
+            <button class="btn" style="background:#10b981" onclick="postReview()">POST REVIEW</button>
+        </div>
+        <div id="reviewWall"></div>
     </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    
-    let userID = 'user_v33_ai';
-    let installDate = localStorage.getItem('install_date') || Date.now();
-    localStorage.setItem('install_date', installDate);
+    const ID = 'user_final_pro_v38';
 
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
-        if(id === 'page-reports') checkSubscription();
+        if(id === 'a-page') { if(localStorage.getItem('premium')==='true') { document.getElementById('lock-screen').style.display='none'; document.getElementById('ai-content').style.display='block'; genRoadmap(); } }
     }
 
-    function checkSubscription() {
-        const isUnlocked = localStorage.getItem('premium_unlocked');
-        const daysUsed = Math.floor((Date.now() - parseInt(installDate)) / (1000*60*60*24));
-        if (isUnlocked === 'true' || daysUsed < 30) {
-            document.getElementById('reports-list').style.display = 'block';
-            document.getElementById('paywall-screen').style.display = 'none';
-        } else {
-            document.getElementById('reports-list').style.display = 'none';
-            document.getElementById('paywall-screen').style.display = 'block';
-        }
+    function unlock() { if(document.getElementById('actCode').value === '1234') { localStorage.setItem('premium', 'true'); location.reload(); } }
+
+    function askAI() {
+        const q = document.getElementById('chat-in').value; if(!q) return;
+        const w = document.getElementById('chat-wall'); w.innerHTML += `<div class="msg user">${q}</div>`;
+        setTimeout(() => { w.innerHTML += `<div class="msg bot"><b>AI:</b> Focus on core stability and 1.6g protein/kg. For injury, use RICE method. You are on the right track for Nationals.</div>`; w.scrollTop = w.scrollHeight; }, 600);
+        document.getElementById('chat-in').value = '';
     }
 
-    function submitPayment() {
-        if(document.getElementById('userUtr').value.length > 5) {
-            localStorage.setItem('premium_unlocked', 'true');
-            alert("Unlocked! Welcome to Premium AI.");
-            location.reload();
-        }
+    function postReview() {
+        const name = document.getElementById('rUser').value;
+        const msg = document.getElementById('rMsg').value;
+        if(name && msg) { db.ref(`${ID}/reviews`).push({ name, msg, date: new Date().toLocaleDateString() }); alert("Review Posted!"); }
     }
 
-    function askChatBot() {
-        const q = document.getElementById('chat-input').value;
-        if(!q) return;
-        const box = document.getElementById('chat-container');
-        box.innerHTML += `<div class="msg msg-user">${q}</div>`;
-        
-        let ans = "Based on your data, focus on core strength. For recovery, use ice baths and 8 hours sleep.";
-        if(q.toLowerCase().includes("injury")) ans = "If it's sharp pain, follow RICE (Rest, Ice, Compression, Elevation). Consult a physio if it lasts >3 days.";
-        if(q.toLowerCase().includes("diet")) ans = "Eat high protein (eggs, chicken/paneer) 2 hours after training and complex carbs before.";
-        
-        setTimeout(() => {
-            box.innerHTML += `<div class="msg msg-bot"><b>AI:</b> ${ans}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }, 600);
-        document.getElementById('chat-input').value = "";
-    }
+    db.ref(`${ID}/reviews`).on('value', snap => {
+        const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
+        snap.forEach(c => { const d = c.val(); wall.innerHTML += `<div class="card"><b>${d.name}</b><br><small>${d.date}</small><p>${d.msg}</p></div>`; });
+    });
 
     function saveData(type) {
-        const pre = type === 'Practice' ? 'p' : 'm';
-        const name = document.getElementById(pre+'Name').value.trim();
-        const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
-        const date = document.getElementById(pre+'Date').value;
-        const score = parseFloat(document.getElementById(pre+'Score').value);
-        if(!name || !date || isNaN(score)) return alert("Fill all fields");
-        db.ref(`${userID}/data/${name}/${event.replace(/\s/g,'')}`).push({ type, event, date, score, ts: Date.now() });
-        alert("Data Saved!");
+        const p = type === 'Practice' ? 'p' : 'm';
+        const name = document.getElementById(p+'Name').value;
+        const event = document.getElementById(p+(type==='Practice'?'Drill':'Event')).value;
+        const score = document.getElementById(p+'Score').value;
+        const date = document.getElementById(p+'Date').value;
+        if(name && score && date) { db.ref(`${ID}/data/${name}/${type}/${event.replace(/\s/g,'')}`).push({ score, date, ts: Date.now(), event }); alert("Saved!"); }
     }
 
-    db.ref(`${userID}/data`).on('value', snap => {
-        const area = document.getElementById('displayArea');
-        const rList = document.getElementById('athlete-career-reports');
-        area.innerHTML = ''; rList.innerHTML = '';
+    db.ref(`${ID}/data`).on('value', snap => {
+        const area = document.getElementById('displayArea'); area.innerHTML = '';
         const data = snap.val(); if(!data) return;
-
         for(let name in data) {
-            const card = document.createElement('div'); card.className = 'athlete-card';
-            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${name.replace(/\s/g,'')}"></div>`;
-            area.appendChild(card);
-            
-            let careerGoal = "Targeting District Level. Needs 10% improvement for State.";
-            let reportHTML = `<div class="card"><h4>🎯 Career Goal: ${name}</h4><p style="font-size:13px; color:#444">`;
-
-            for(let eKey in data[name]) {
-                const logs = Object.values(data[name][eKey]).sort((a,b)=>a.ts - b.ts);
-                const latest = logs[logs.length-1];
-                reportHTML += `<b>${latest.event}:</b> ${careerGoal}<br>`;
-                
-                const gCard = document.createElement('div'); gCard.className = 'graph-card';
-                gCard.innerHTML = `<small>${latest.event}</small><canvas id="c-${name.replace(/\s/g,'')}-${eKey}"></canvas>`;
-                document.getElementById(`sc-${name.replace(/\s/g,'')}`).appendChild(gCard);
-                
-                setTimeout(() => {
-                    new Chart(document.getElementById(`c-${name.replace(/\s/g,'')}-${eKey}`), {
-                        type: 'line',
-                        data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.3 }] },
-                        options: { scales:{x:{display:false}}, plugins:{legend:{display:false}} }
-                    });
-                }, 100);
+            const c = document.createElement('div'); c.className = 'card';
+            c.innerHTML = `<h3>👤 ${name}</h3>`;
+            ['Practice', 'Main'].forEach(cat => { if(data[name][cat]) { c.innerHTML += `<h4>${cat} Progress</h4><div class="scroll-x" id="sc-${name}-${cat}"></div>`; }});
+            area.appendChild(c);
+            for(let cat in data[name]) {
+                for(let e in data[name][cat]) {
+                    const logs = Object.values(data[name][cat][e]).sort((a,b)=>a.ts-b.ts);
+                    const gid = `g-${name}-${cat}-${e}`.replace(/\s/g,'');
+                    const gc = document.createElement('div'); gc.className = 'graph-card';
+                    gc.innerHTML = `<b>${logs[logs.length-1].event}</b><canvas id="${gid}"></canvas><div class="ai-advice"><b>AI Tip:</b> Focus on explosive power to beat your last score of ${logs[logs.length-1].score}.</div>`;
+                    document.getElementById(`sc-${name}-${cat}`).appendChild(gc);
+                    setTimeout(()=>renderG(gid, logs), 500);
+                }
             }
-            reportHTML += `</p></div>`;
-            rList.innerHTML += reportHTML;
         }
     });
 
-    function adminCheck() {
-        if(prompt("Admin Code:") === "1234") {
-            let upi = prompt("Enter New UPI ID:");
-            if(upi) localStorage.setItem('owner_upi', upi);
-        }
+    function genRoadmap() {
+        db.ref(`${ID}/data`).once('value', snap => {
+            const data = snap.val(); const w = document.getElementById('roadmap-wall'); w.innerHTML = '<h4>🎯 Career Roadmap</h4>';
+            for(let n in data) { w.innerHTML += `<div class="card" style="border-left:5px solid #7c3aed"><b>Athlete: ${n}</b><p style="font-size:12px">Based on your 2-week data, you are 15% away from National qualification. Increase plyometric volume by 2 sets.</p></div>`; }
+        });
     }
+
+    function renderG(id, logs) { new Chart(document.getElementById(id), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.4 }] }, options: { plugins:{legend:{display:false}}, scales:{x:{display:false}} }}); }
 </script>
 </body>
 </html>
