@@ -3,220 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Academy Pro - v69 Final</title>
+    <title>Athlete Academy v81</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --premium: #7c3aed; --bg: #f8fafc; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; overflow-x: hidden; }
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 2px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
-        .nav-btn { min-width: 100px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: 800; color: #64748b; cursor: pointer; border: none; background: none; transition: 0.3s; }
-        .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #eff6ff; }
-        .container { padding: 15px; display: none; max-width: 800px; margin: auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 75px; }
+        .ath-bar { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid #ddd; }
+        .ath-chip { min-width: 65px; text-align: center; cursor: pointer; opacity: 0.5; }
+        .ath-chip.active { opacity: 1; color: var(--primary); font-weight: bold; }
+        .ath-chip img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ccc; object-fit: cover; }
+        .container { padding: 15px; max-width: 800px; margin: auto; display: none; }
         .container.active { display: block; }
-        .card { background: white; padding: 18px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        
-        /* HORIZONTAL GRAPHS */
-        .graph-slider { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .graph-card { min-width: 85%; scroll-snap-align: center; background: white; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; }
-        
-        .ai-coach-tip { background: #f0fdf4; border-left: 5px solid #22c55e; padding: 12px; border-radius: 12px; margin-top: 10px; font-size: 13px; color: #166534; }
-        .profile-pic { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); display: block; margin: 0 auto 10px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 15px; margin-top: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
-        .del-btn { color: red; background: none; border: 1px solid red; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 10px; }
+        .card { background: #fff; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .graph-slider { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
+        .graph-card { min-width: 85%; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ddd; height: 65px; }
+        .nav-btn { flex: 1; border: none; background: none; font-size: 10px; font-weight: bold; color: #666; }
+        .nav-btn.active { color: var(--primary); }
+        .del-btn { background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+        .pay-wall { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; overflow-y: auto; }
+        .ai-box { background: #eff6ff; border-left: 4px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="nav" id="mainNav" style="display:none;">
-        <div class="nav-btn active" id="btn-p" onclick="showTab('p-page', this)">PRACTICE</div>
-        <div class="nav-btn" id="btn-m" onclick="showTab('m-page', this)">MAIN</div>
-        <div class="nav-btn" id="btn-d" onclick="showTab('d-page', this)">DASHBOARD</div>
-        <div class="nav-btn" id="btn-a" onclick="showTab('a-page', this)">AIA PREMIUM</div>
-        <div class="nav-btn" id="btn-v" onclick="showTab('v-page', this)">REVIEWS</div>
-    </div>
-
-    <div id="login-screen" style="padding: 20px; text-align: center; margin-top: 40px;">
+    <div id="payWall" class="pay-wall">
+        <h2 style="color:var(--main)">Trial Expired!</h2>
         <div class="card">
-            <h2>🏆 Academy Portal</h2>
-            <select id="userRole" onchange="toggleRoleFields()">
-                <option value="athlete">Athlete Login</option>
-                <option value="coach">Coach Login</option>
-            </select>
-            <input type="text" id="userAccessName" placeholder="Enter Name">
-            <div id="athleteFields">
-                <input type="text" id="userPhotoUrl" placeholder="Photo Link (Drive/Web)">
-            </div>
-            <div id="coachFields" style="display:none;">
-                <input type="password" id="coachPassword" placeholder="Coach Password (1234)">
-            </div>
-            <button class="btn" style="background: var(--primary)" onclick="handleLogin()">LOGIN</button>
+            <h4>Scan to Pay ₹499</h4>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=your-upi-id@okicici" width="150">
+            <p>Enter Transaction ID below:</p>
+            <input type="text" id="txId" placeholder="12-digit Ref No.">
+            <button class="btn" style="background:var(--primary)" onclick="activate()">ACTIVATE PREMIUM</button>
         </div>
     </div>
 
-    <div id="app-content" style="display: none;">
-        
-        <div id="p-page" class="container active">
-            <h2>🏃 Practice Drills</h2>
-            <div id="athlete-input-p" class="card">
-                <select id="pDrill">
-                    <option>30 Metre</option><option>40 Metre</option><option>80 Metre</option><option>120 Metre</option>
-                    <option>150 Metre</option><option>180 Metre</option><option>300 Metre</option><option>800 Metre</option>
-                    <option>Broad Jump</option><option>Standing Triple</option><option>5 Bounded</option><option>10 Bounded</option>
-                </select>
-                <input type="number" step="0.01" id="pScore" placeholder="Score"><input type="date" id="pDate">
-                <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
-            </div>
-            <div id="practice-graphs" class="graph-slider"></div>
+    <div class="ath-bar" id="athBar"></div>
+
+    <div id="app-content">
+        <div id="d-page" class="container active">
+            <h2 id="athName" style="text-align:center;">Athlete Dash</h2>
+            <div id="aiSuggestion" class="ai-box"><b>AI Suggestion:</b> Add data to see coaching tips.</div>
+            <div id="dashboard-graphs" class="graph-slider"></div>
         </div>
 
-        <div id="m-page" class="container">
-            <h2>🏆 Main Events</h2>
-            <div id="athlete-input-m" class="card">
-                <select id="mEvent">
-                    <option>100 Metre</option><option>200 Metre</option><option>400 Metre</option><option>800 Metre</option>
-                    <option>1500 Metre</option><option>3 Kilometre</option><option>5 Kilometre</option>
-                    <option>Long Jump</option><option>High Jump</option><option>Triple Jump</option>
-                    <option>Javelin</option><option>Discus</option><option>Shot Put</option>
-                </select>
-                <input type="number" step="0.01" id="mScore" placeholder="Score"><input type="date" id="mDate">
-                <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE RESULT</button>
-            </div>
-            <div id="main-graphs" class="graph-slider"></div>
-        </div>
-
-        <div id="d-page" class="container">
-            <div id="coach-view" style="display:none;"><h3>Academy Athletes</h3><div id="athleteList"></div></div>
-            <div id="athlete-view">
-                <div id="athleteHeader" style="text-align:center"></div>
-                <h3>📊 Performance Analytics</h3>
-                <div id="overallStats" class="card" style="background: #f1f5f9;">Summary loading...</div>
-            </div>
-        </div>
-
-        <div id="a-page" class="container"><h2>🤖 AIA Elite</h2><div class="card">Unlock with 1234.</div></div>
-        <div id="v-page" class="container">
-            <h2>💬 Reviews</h2>
+        <div id="i-page" class="container">
             <div class="card">
-                <select id="revStars"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select>
-                <textarea id="revText" placeholder="Message..."></textarea>
-                <button class="btn" style="background: var(--primary)" onclick="submitReview()">POST</button>
+                <h3>New Session</h3>
+                <select id="cat" onchange="upd()"><option value="Practice">Practice (12)</option><option value="Main">Main (13)</option></select>
+                <select id="sub"></select>
+                <input type="number" step="0.01" id="sc" placeholder="Score"><input type="date" id="dt">
+                <button class="btn" style="background: var(--practice)" onclick="save()">SAVE SESSION</button>
             </div>
-            <div id="reviewWall"></div>
+            <div id="p-slider" class="graph-slider"></div>
+            <div id="m-slider" class="graph-slider"></div>
         </div>
+
+        <div id="v-page" class="container">
+            <div class="card">
+                <h3>Global Reviews (<span id="count">0</span>)</h3>
+                <select id="stars"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
+                <textarea id="rev" placeholder="How is the coaching?"></textarea>
+                <button class="btn" style="background:var(--primary)" onclick="post()">SUBMIT REVIEW</button>
+            </div>
+            <div id="wall"></div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <button class="nav-btn active" onclick="tab('d-page',this)">📊 DASH</button>
+        <button class="nav-btn" onclick="tab('i-page',this)">🏃 TRAINING</button>
+        <button class="nav-btn" onclick="tab('v-page',this)">💬 REVIEWS</button>
+        <button class="nav-btn" onclick="addAth()">👤 +ATHLETE</button>
     </div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const ID = 'user_v69_final';
-    let currentUser = { name: "", role: "" };
+    // Yahan apni Firebase details dalein
+    const fb = { apiKey: "AIzaSy...", databaseURL: "https://your-app.firebaseio.com" };
+    firebase.initializeApp(fb); const db = firebase.database(); const ID = 'academy_v81'; let active = "";
 
-    function toggleRoleFields() {
-        const r = document.getElementById('userRole').value;
-        document.getElementById('athleteFields').style.display = r === 'athlete' ? 'block' : 'none';
-        document.getElementById('coachFields').style.display = r === 'coach' ? 'block' : 'none';
-    }
+    function upd() {
+        const c = document.getElementById('cat').value; const s = document.getElementById('sub');
+        const l = c==='Practice' ? ['30m','40m','80m','120m','150m','180m','300m','800m','Broad Jump','Standing Triple','5 Bounded','10 Bounded'] : ['100m','200m','400m','800m','1500m','3km','5km','Long Jump','High Jump','Triple Jump','Javelin','Discus','Shot Put'];
+        s.innerHTML = l.map(i=>`<option value="${i}">${i}</option>`).join('');
+    } upd();
 
-    function handleLogin() {
-        const r = document.getElementById('userRole').value;
-        const n = document.getElementById('userAccessName').value.trim();
-        if(!n) return alert("Enter Name");
+    function addAth() { const n = prompt("Name:"); const p = prompt("Photo URL:"); if(n) db.ref(`${ID}/athletes/${n}`).set({name:n, photo:p||"https://cdn-icons-png.flaticon.com/512/3135/3135715.png", regDate: Date.now(), premium: false}); }
 
-        if(r === 'coach') {
-            if(document.getElementById('coachPassword').value !== "1234") return alert("Wrong Password");
-            currentUser = { name: n, role: 'coach' };
-        } else {
-            const p = document.getElementById('userPhotoUrl').value || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            currentUser = { name: n, role: 'athlete', photo: p };
-            db.ref(`${ID}/athletes/${n}`).update({ photo: p, name: n });
-        }
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('mainNav').style.display = 'flex';
-        document.getElementById('app-content').style.display = 'block';
-        initApp();
-    }
-
-    function showTab(id, btn) {
-        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active'); btn.classList.add('active');
-    }
-
-    function initApp() {
-        if(currentUser.role === 'coach') {
-            document.getElementById('athlete-input-p').style.display = 'none';
-            document.getElementById('athlete-input-m').style.display = 'none';
-            document.getElementById('coach-view').style.display = 'block';
-            document.getElementById('athlete-view').style.display = 'none';
-            loadCoachDashboard();
-        } else {
-            loadAthleteData(currentUser.name);
-        }
-        loadReviews();
-    }
-
-    function loadCoachDashboard() {
+    function loadAth() {
         db.ref(`${ID}/athletes`).on('value', snap => {
-            const list = document.getElementById('athleteList'); list.innerHTML = '';
-            snap.forEach(a => {
-                const ath = a.val();
-                const div = document.createElement('div'); div.className = 'card';
-                div.style.cursor = 'pointer';
-                div.innerHTML = `<img src="${ath.photo}" style="width:30px; border-radius:50%;"> ${ath.name} - View Stats`;
-                div.onclick = () => { loadAthleteData(ath.name); showTab('p-page', document.getElementById('btn-p')); };
-                list.appendChild(div);
+            const b = document.getElementById('athBar'); b.innerHTML = '';
+            snap.forEach(c => {
+                const a = c.val(); if(!active) sel(a.name);
+                const d = document.createElement('div'); d.className = `ath-chip ${active===a.name?'active':''}`;
+                d.onclick = () => sel(a.name); d.innerHTML = `<img src="${a.photo}"><br><small>${a.name}</small>`; b.appendChild(d);
             });
         });
     }
 
-    function loadAthleteData(name) {
-        db.ref(`${ID}/data/${name}`).on('value', snap => {
-            const data = snap.val(); 
-            const pArea = document.getElementById('practice-graphs'); pArea.innerHTML = '';
-            const mArea = document.getElementById('main-graphs'); mArea.innerHTML = '';
-            
-            db.ref(`${ID}/athletes/${name}`).once('value', aSnap => {
-                document.getElementById('athleteHeader').innerHTML = `<img src="${aSnap.val().photo}" class="profile-pic"><h3>${name}</h3>`;
-            });
+    function sel(n) {
+        active = n; document.getElementById('athName').innerText = n;
+        db.ref(`${ID}/athletes/${n}`).once('value', s => {
+            const a = s.val(); const days = Math.ceil((30*24*60*60*1000 - (Date.now()-a.regDate))/(1000*60*60*24));
+            document.getElementById('payWall').style.display = (!a.premium && days <= 0) ? 'flex' : 'none';
+        });
+        loadData(n);
+    }
 
-            if(!data) return;
-            for(let cat in data) {
-                for(let e in data[cat]) {
-                    const logs = Object.entries(data[cat][e]).map(([k,v])=>({k,...v})).sort((a,b)=>a.ts-b.ts);
-                    const gid = `g-${name}-${cat}-${e}`.replace(/\s/g,'');
-                    const card = document.createElement('div'); card.className = 'graph-card';
-                    
-                    let table = `<div style="font-size:11px; margin-top:10px; background:#f9f9f9; padding:5px; border-radius:10px;">`;
-                    logs.forEach(l => { table += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${l.date}: ${l.score}</span> <button class="del-btn" onclick="delEntry('${name}','${cat}','${e}','${l.k}')">Del</button></div>`; });
-                    table += `</div>`;
-
-                    card.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas><div class="ai-coach-tip"><b>AI Coach:</b> Consistency is great! Focus on explosive start.</div>${table}`;
-                    if(cat === 'Practice') pArea.appendChild(card); else mArea.appendChild(card);
-                    setTimeout(() => new Chart(document.getElementById(gid), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', fill: false }] } }), 500);
-                }
-            }
+    function loadData(n) {
+        db.ref(`${ID}/data/${n}`).on('value', snap => {
+            const ps=document.getElementById('p-slider'), ms=document.getElementById('m-slider'), ds=document.getElementById('dashboard-graphs');
+            ps.innerHTML=ms.innerHTML=ds.innerHTML=''; const d = snap.val(); if(!d) return;
+            for(let c in d) { for(let e in d[c]) {
+                const logs = Object.entries(d[c][e]).map(([k,v])=>({k,...v})).sort((a,b)=>a.ts-b.ts);
+                const gid = `g-${c}-${e}`.replace(/\s/g,''); const card = document.createElement('div'); card.className = 'graph-card';
+                let t = `<div style="margin-top:10px; border-top:1px solid #eee;">`;
+                logs.forEach(l => { t += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f9f9f9;"><span>${l.date}: <b>${l.score}</b></span><button class="del-btn" onclick="del('${c}','${e}','${l.k}')">X</button></div>`; });
+                card.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas>${t}</div>`;
+                if(c === 'Practice') ps.appendChild(card); else ms.appendChild(card);
+                ds.appendChild(card.cloneNode(true));
+                setTimeout(() => new Chart(document.getElementById(gid), {type:'line', data:{labels:logs.map(l=>l.date), datasets:[{label:e, data:logs.map(l=>l.score), borderColor:'#2563eb'}]}}), 500);
+            }}
+            document.getElementById('aiSuggestion').innerHTML = `<b>AI Coach:</b> Improvement seen in last sessions. Focus on recovery today!`;
         });
     }
 
-    function delEntry(name, cat, ev, key) { if(confirm("Delete result?")) db.ref(`${ID}/data/${name}/${cat}/${ev.replace(/\s/g,'')}/${key}`).remove(); }
-    function saveData(cat) {
-        const p = cat === 'Practice' ? 'p' : 'm';
-        const ev = document.getElementById(p+(cat==='Practice'?'Drill':'Event')).value;
-        const sc = parseFloat(document.getElementById(p+'Score').value);
-        const dt = document.getElementById(p+'Date').value;
-        if(sc && dt) db.ref(`${ID}/data/${currentUser.name}/${cat}/${ev.replace(/\s/g,'')}`).push({ score: sc, date: dt, ts: Date.now() });
-    }
-    function submitReview() { db.ref(`${ID}/reviews`).push({ name: currentUser.name, stars: document.getElementById('revStars').value, msg: document.getElementById('revText').value }); }
-    function loadReviews() {
-        db.ref(`${ID}/reviews`).on('value', snap => {
-            const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
-            snap.forEach(r => { const d = r.val(); wall.innerHTML = `<div class="card"><b>${d.name}</b> ⭐${d.stars}<p>${d.msg}</p></div>` + wall.innerHTML; });
-        });
-    }
+    function save() { const c=document.getElementById('cat').value, e=document.getElementById('sub').value, s=document.getElementById('sc').value, d=document.getElementById('dt').value; if(active && s && d) db.ref(`${ID}/data/${active}/${c}/${e}`).push({score:s, date:d, ts:Date.now()}); }
+    function del(c,e,k) { if(confirm("Delete this session?")) db.ref(`${ID}/data/${active}/${c}/${e}/${k}`).remove(); }
+    function activate() { const id = document.getElementById('txId').value; if(id) { db.ref(`${ID}/athletes/${active}`).update({premium: true}); location.reload(); } }
+    function tab(id, b) { document.querySelectorAll('.container').forEach(c=>c.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('active')); document.getElementById(id).classList.add('active'); b.classList.add('active'); }
+    function post() { db.ref(`${ID}/reviews`).push({name:active, stars:document.getElementById('stars').value, msg:document.getElementById('rev').value}); }
+    db.ref(`${ID}/reviews`).on('value', s => { 
+        const w=document.getElementById('wall'); w.innerHTML=''; let count=0;
+        s.forEach(r=>{ const d=r.val(); count++; w.innerHTML=`<div class="card"><b>${d.name}</b> ${d.stars}<p>${d.msg}</p></div>`+w.innerHTML; });
+        document.getElementById('count').innerText = count;
+    });
+    loadAth();
 </script>
 </body>
 </html>
