@@ -3,37 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track & Field Coach-Pro AI</title>
+    <title>Track & Field AI Pro - Final</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --p: #1e40af; --s: #7c3aed; --bg: #f1f5f9; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-bottom: 60px; }
-        
-        /* Navigation Scrollable Menu */
+        :root { --p: #1e40af; --s: #7c3aed; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 60px; }
         .nav-bar { display: flex; overflow-x: auto; background: white; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 1000; padding: 5px; scrollbar-width: none; }
         .nav-bar::-webkit-scrollbar { display: none; }
         .nav-btn { padding: 12px 20px; border: none; background: none; font-weight: bold; color: #64748b; cursor: pointer; white-space: nowrap; }
         .nav-btn.active { color: var(--p); border-bottom: 3px solid var(--p); }
-
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
         .container.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; border: 1px solid #e2e8f0; }
         label { font-weight: 600; font-size: 14px; color: #475569; display: block; margin-top: 10px; }
-        select, input, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        
-        /* Review styling */
-        .review-card { border-left: 5px solid var(--s); background: #fdf2ff; padding: 15px; border-radius: 10px; margin-bottom: 10px; position: relative; }
-        .date-tag { font-size: 11px; color: #64748b; position: absolute; top: 10px; right: 10px; }
-        
-        #chatBox { height: 250px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px; }
-        .msg-ai { background: white; padding: 10px; border-radius: 12px 12px 12px 0; border-left: 4px solid var(--s); font-size: 14px; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .msg-user { background: var(--p); color: white; padding: 10px; border-radius: 12px 12px 0 12px; font-size: 14px; align-self: flex-end; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 12px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
+        .feedback-card { background: #fff; border-left: 5px solid #10b981; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .user-info { font-weight: bold; color: var(--p); font-size: 14px; }
+        .time-tag { font-size: 11px; color: #94a3b8; float: right; }
+        .star-rating { color: #f59e0b; font-size: 14px; margin: 4px 0; }
     </style>
 </head>
 <body>
@@ -41,19 +32,21 @@
     <div class="nav-bar">
         <button class="nav-btn active" onclick="showTab('p-tab', this)">🏃 Practice</button>
         <button class="nav-btn" onclick="showTab('m-tab', this)">🏆 Main Event</button>
-        <button class="nav-btn" onclick="showTab('d-tab', this)">🤖 Coach AI</button>
-        <button class="nav-btn" onclick="showTab('r-tab', this)">📊 AI Report 💎</button>
-        <button class="nav-btn" onclick="showTab('v-tab', this)">💬 Coach Review</button>
+        <button class="nav-btn" onclick="showTab('r-tab', this)">📊 AI Report</button>
+        <button class="nav-btn" onclick="showTab('v-tab', this)">💬 App Reviews</button>
     </div>
 
     <div id="p-tab" class="container active">
         <h2>Practice Session</h2>
         <div class="card">
             <label>Athlete Name:</label>
-            <input type="text" id="pAthlete" placeholder="Who is practicing?">
+            <input type="text" id="pAthleteName" placeholder="Enter Athlete Name">
             
-            <label>Select Drill:</label>
-            <select id="pDrill">
+            <label>Date of Practice:</label>
+            <input type="date" id="pDate">
+
+            <label>Select Drill (A-Z):</label>
+            <select id="pDrillSelect">
                 <option>30 Metre</option><option>40 Metre</option><option>80 Metre</option>
                 <option>120 Metre</option><option>150 Metre</option><option>180 Metre</option>
                 <option>300 Metre</option><option>800 Metre</option>
@@ -63,82 +56,43 @@
             </select>
             
             <label>Result (Time/Distance):</label>
-            <input type="number" step="0.01" id="pVal" placeholder="0.00">
-            <button class="btn" style="background:var(--p)" onclick="saveData('practice')">SAVE DRILL DATA</button>
+            <input type="number" step="0.01" id="pResultValue" placeholder="e.g. 4.10 or 6.50">
+            
+            <button class="btn" style="background:var(--p)" onclick="savePractice()">SAVE DATA</button>
         </div>
     </div>
 
     <div id="m-tab" class="container">
-        <h2>Main Event Results</h2>
+        <h2>Main Event</h2>
         <div class="card">
             <label>Athlete Name:</label>
-            <input type="text" id="mAthlete" placeholder="Athlete Name">
-            
+            <input type="text" id="mAthleteName" placeholder="Athlete Name">
+            <label>Event Date:</label>
+            <input type="date" id="mDate">
             <label>Select Event:</label>
-            <select id="mEvent">
-                <optgroup label="Sprints">
-                    <option>60m</option><option>100m</option><option>200m</option><option>400m</option>
-                </optgroup>
-                <optgroup label="Middle/Long">
-                    <option>800m</option><option>1500m</option><option>3000m</option><option>5000m</option><option>10000m</option>
-                </optgroup>
-                <optgroup label="Jumps">
-                    <option>Long Jump</option><option>High Jump</option><option>Triple Jump</option><option>Pole Vault</option>
-                </optgroup>
-                <optgroup label="Throws">
-                    <option>Shot Put</option><option>Javelin</option><option>Discus</option><option>Hammer Throw</option>
-                </optgroup>
+            <select id="mEventSelect">
+                <option>100m</option><option>200m</option><option>400m</option><option>800m</option>
+                <option>1500m</option><option>Long Jump</option><option>Javelin</option>
             </select>
-            
             <label>Final Result:</label>
-            <input type="number" step="0.01" id="mVal" placeholder="Enter Score/Time">
-            <button class="btn" style="background:var(--s)" onclick="saveData('main')">SAVE MAIN EVENT</button>
-        </div>
-    </div>
-
-    <div id="d-tab" class="container">
-        <h2>AI Coach Dashboard</h2>
-        <div class="card" style="border-left: 5px solid #f59e0b;">
-            <p id="aiCoachMsg">Training data is being monitored... Select an athlete to see advice.</p>
-        </div>
-    </div>
-
-    <div id="r-tab" class="container">
-        <div id="sub-box" class="card" style="text-align:center;">
-            <h2>Premium Reports 🔒</h2>
-            <p>Your 30-day trial is active or enter code (1234).</p>
-            <input type="text" id="subCode" placeholder="Activation Code">
-            <button class="btn" style="background:var(--p)" onclick="unlock()">ACTIVATE NOW</button>
-        </div>
-
-        <div id="premium-content">
-            <div class="card">
-                <h3>Flexible AI Analytics</h3>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn" style="background:#ddd; color:black; font-size:12px;" onclick="genReport(7)">1 Week</button>
-                    <button class="btn" style="background:#ddd; color:black; font-size:12px;" onclick="genReport(30)">1 Month</button>
-                </div>
-                <p id="reportOut" style="margin-top:10px; color:#1e40af; font-weight:bold;">Click a period to analyze.</p>
-            </div>
-            
-            <h3>24/7 AI Personal Chat</h3>
-            <div id="chatBox"></div>
-            <div style="display:flex; gap:5px; margin-top:10px;">
-                <input type="text" id="chatInput" placeholder="Ask anything...">
-                <button class="btn" style="width:80px; background:var(--s)" onclick="askAI()">ASK</button>
-            </div>
+            <input type="number" step="0.01" id="mResultValue" placeholder="Result">
+            <button class="btn" style="background:var(--s)" onclick="saveMainEvent()">SAVE EVENT</button>
         </div>
     </div>
 
     <div id="v-tab" class="container">
-        <h2>Coach Review Center</h2>
+        <h2>User Experience & Reviews</h2>
         <div class="card">
-            <input type="text" id="revCoach" placeholder="Your Name (Coach)">
-            <input type="text" id="revStudent" placeholder="Student's Name">
-            <textarea id="revText" placeholder="Technical feedback for the athlete..."></textarea>
-            <button class="btn" style="background:#0f172a" onclick="saveReview()">SUBMIT REVIEW</button>
+            <input type="text" id="revUserName" placeholder="Your Name">
+            <select id="revStars">
+                <option value="⭐⭐⭐⭐⭐">5 Stars - Love it!</option>
+                <option value="⭐⭐⭐⭐">4 Stars - Very Good</option>
+                <option value="⭐⭐⭐">3 Stars - Good</option>
+            </select>
+            <textarea id="revUserMsg" placeholder="Share your experience with this app..."></textarea>
+            <button class="btn" style="background:#10b981" onclick="submitAppReview()">POST REVIEW</button>
         </div>
-        <div id="reviewList"></div>
+        <div id="feedbackList"></div>
     </div>
 
     <script>
@@ -154,60 +108,59 @@
             btn.classList.add('active');
         }
 
-        function saveData(type) {
-            const athlete = document.getElementById(type === 'practice' ? 'pAthlete' : 'mAthlete').value;
-            const event = document.getElementById(type === 'practice' ? 'pDrill' : 'mEvent').value;
-            const val = document.getElementById(type === 'practice' ? 'pVal' : 'mVal').value;
-            const date = new Date().toLocaleString();
+        // SAVE PRACTICE DATA
+        function savePractice() {
+            const name = document.getElementById('pAthleteName').value;
+            const date = document.getElementById('pDate').value;
+            const drill = document.getElementById('pDrillSelect').value;
+            const val = document.getElementById('pResultValue').value;
 
-            if(!athlete || !val) return alert("Bhai, naam aur result daalo!");
-            db.ref(`academy/${type}`).push({ athlete, event, val, date });
-            alert("Success! Data saved.");
+            if(!name || !date || !val) return alert("Bhai, Name, Date aur Result teeno bharo!");
+
+            db.ref(`academy/practice`).push({ name, date, drill, val });
+            alert("Practice Data Saved!");
         }
 
-        function saveReview() {
-            const coach = document.getElementById('revCoach').value;
-            const student = document.getElementById('revStudent').value;
-            const text = document.getElementById('revText').value;
-            const date = new Date().toLocaleDateString();
+        // SAVE MAIN EVENT
+        function saveMainEvent() {
+            const name = document.getElementById('mAthleteName').value;
+            const date = document.getElementById('mDate').value;
+            const event = document.getElementById('mEventSelect').value;
+            const val = document.getElementById('mResultValue').value;
 
-            if(coach && student && text) {
-                db.ref(`academy/reviews`).push({ coach, student, text, date });
-                alert("Review Posted!");
+            if(!name || !date || !val) return alert("Detail bhariye!");
+            db.ref(`academy/main`).push({ name, date, event, val });
+            alert("Event Data Saved!");
+        }
+
+        // PUBLIC REVIEWS
+        function submitAppReview() {
+            const name = document.getElementById('revUserName').value;
+            const stars = document.getElementById('revStars').value;
+            const msg = document.getElementById('revUserMsg').value;
+            const time = new Date().toLocaleString();
+
+            if(name && msg) {
+                db.ref(`public_app_reviews`).push({ name, stars, msg, time });
+                alert("Review submitted!");
+                document.getElementById('revUserMsg').value = "";
             }
         }
 
-        db.ref(`academy/reviews`).on('value', snap => {
-            const list = document.getElementById('reviewList');
+        db.ref(`public_app_reviews`).on('value', snap => {
+            const list = document.getElementById('feedbackList');
             list.innerHTML = "";
             snap.forEach(child => {
-                const r = child.val();
+                const d = child.val();
                 list.innerHTML += `
-                    <div class="review-card">
-                        <span class="date-tag">${r.date}</span>
-                        <b>Coach ${r.coach}</b> to <b>${r.student}</b>
-                        <p>${r.text}</p>
+                    <div class="feedback-card">
+                        <span class="time-tag">${d.time}</span>
+                        <div class="user-info">${d.name}</div>
+                        <div class="star-rating">${d.stars}</div>
+                        <p>${d.msg}</p>
                     </div>`;
             });
         });
-
-        function askAI() {
-            const input = document.getElementById('chatInput');
-            if(!input.value) return;
-            document.getElementById('chatBox').innerHTML += `<div class="msg-user">${input.value}</div>`;
-            setTimeout(() => {
-                document.getElementById('chatBox').innerHTML += `<div class="msg-ai"><b>AI:</b> Aapka data batata hai ki speed achhi hai par muscle recovery par dhyan dein.</div>`;
-            }, 800);
-            input.value = '';
-        }
-
-        function unlock() {
-            if(document.getElementById('subCode').value === "1234") {
-                localStorage.setItem('isPremium', 'true');
-                alert("Unlocked!");
-                location.reload();
-            }
-        }
     </script>
 </body>
 </html>
