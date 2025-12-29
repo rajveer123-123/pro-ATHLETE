@@ -11,7 +11,6 @@
         :root { --primary: #1e40af; --practice: #059669; --main: #dc2626; --bg: #f1f5f9; --ai-purple: #7c3aed; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; overflow-x: hidden; }
         
-        /* Navigation */
         .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
         .nav-btn { min-width: 85px; flex: 1; padding: 20px 5px; text-align: center; font-size: 10px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; text-transform: uppercase; }
         .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #f0f7ff; }
@@ -19,12 +18,9 @@
         .container { padding: 15px; display: none; max-width: 850px; margin: auto; }
         .container.active { display: block; }
 
-        /* Athlete Flashcards (New Dashboard Style) */
         .card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; position: relative; }
         .athlete-flashcard { background: white; border-radius: 20px; padding: 20px; border-left: 8px solid var(--ai-purple); cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
-        .athlete-flashcard:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-
-        /* Scrollers for Details */
+        
         .event-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 5px; scrollbar-width: none; }
         .event-box { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         
@@ -33,17 +29,16 @@
         
         .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         .data-table th, .data-table td { text-align: left; padding: 8px; border-bottom: 1px solid #f1f5f9; }
-        .pb-tag { background: #fffbeb; border: 1px solid #fbbf24; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; color: #92400e; }
         .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 10px; }
-        .profile-del { position: absolute; top: 20px; right: 20px; background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 10px; font-size: 10px; cursor: pointer; }
         
         canvas { max-height: 180px; width: 100% !important; margin: 10px 0; }
-        
-        #chat-window { height: 300px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
-        .msg-bot { align-self: flex-start; background: #ede9fe; color: #4c1d95; border-bottom-left-radius: 2px; border-left: 4px solid var(--ai-purple); }
         .live-count-badge { background: var(--ai-purple); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+
+        .star-rating { font-size: 24px; color: #cbd5e1; cursor: pointer; margin: 10px 0; display: flex; gap: 5px; }
+        .star.selected { color: #fbbf24; }
+
+        .ai-box { background: #f5f3ff; border-left: 4px solid var(--ai-purple); padding: 12px; border-radius: 12px; margin-top: 10px; font-size: 12px; color: #4c1d95; line-height: 1.4; }
+        .ai-box b { color: var(--ai-purple); display: block; margin-bottom: 3px; }
     </style>
 </head>
 <body>
@@ -52,17 +47,15 @@
         <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
         <div class="nav-btn" onclick="showTab('m-page', this)">OFFICIAL</div>
         <div class="nav-btn" onclick="showTab('d-page', this)">ANALYTICS</div>
-        <div class="nav-btn" onclick="showTab('a-page', this)">AI COACH</div>
         <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
     <div id="p-page" class="container active">
         <div class="card">
-            <h3>🏃 Practice Log Entry</h3>
+            <h3>🏃 Practice Log</h3>
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <optgroup label="Sprints (Time)">
-                   <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
+                <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
                     <option>120m</option><option>150m</option><option>180m</option><option>300m</option>
                 </optgroup>
                 <optgroup label="Jumps (Distance)">
@@ -110,7 +103,7 @@
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
-            <button class="btn-save" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL TRIAL</button>
+            <button class="btn-save" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL</button>
         </div>
         <div id="main-display"></div>
     </div>
@@ -119,25 +112,8 @@
         <h2 style="text-align:center">📈 Progress Dashboard</h2>
         <div id="flashcard-list"></div>
         <div id="detail-view" style="display:none;">
-            <button class="btn-save" style="background:#64748b; margin-bottom:10px;" onclick="closeDetails()">← BACK TO ALL PLAYERS</button>
+            <button class="btn-save" style="background:#64748b; margin-bottom:10px;" onclick="closeDetails()">← BACK</button>
             <div id="detail-content"></div>
-        </div>
-    </div>
-
-    <div id="a-page" class="container">
-        <div class="card" id="lock-screen">
-            <h3>AIA Premium Coach 🔒</h3>
-            <input type="text" id="pin" placeholder="Enter PIN (1234)">
-            <button class="btn-save" style="background: var(--ai-purple)" onclick="unlockAI()">UNLOCK AI</button>
-        </div>
-        <div id="ai-interface" style="display:none;">
-            <div class="card">
-                <h4>🤖 AIA Smart Coach</h4>
-                <div id="chat-window"></div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="text" id="chat-in" placeholder="Ask specific questions..."><button class="btn-save" style="width:70px; margin:0; background: var(--ai-purple)" onclick="askAdvancedCoach()">ASK</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -147,16 +123,10 @@
         </div>
         <div class="card">
             <h3>💬 Global Experience Review</h3>
+            <div class="star-rating" id="starContainer">
+                <span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span>
+            </div>
             <input type="text" id="revName" placeholder="Your Name">
-            <select id="revRole">
-                <option value="Student">Athlete / Student</option>
-                <option value="Coach">Professional Coach</option>
-            </select>
-            <select id="revStars" style="background:#fffbeb; border:1px solid #fbbf24;">
-                <option value="5">⭐⭐⭐⭐⭐</option>
-                <option value="4">⭐⭐⭐⭐</option>
-                <option value="3">⭐⭐⭐</option>
-            </select>
             <textarea id="revText" placeholder="Write feedback..."></textarea>
             <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST GLOBAL REVIEW</button>
         </div>
@@ -171,146 +141,119 @@
     let devID = localStorage.getItem('athlete_dev_id') || 'D-' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('athlete_dev_id', devID);
     const ID = 'Elite_' + devID;
-    let charts = {};
+
+    let selectedStars = 0;
+    function setStar(n) {
+        selectedStars = n;
+        document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('selected', i < n));
+    }
 
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
-        if(localStorage.getItem('premium_unlocked') === 'true') {
-            document.getElementById('lock-screen').style.display = 'none';
-            if(document.getElementById('ai-interface')) document.getElementById('ai-interface').style.display = 'block';
-        }
     }
 
-    function unlockAI() { if(document.getElementById('pin').value==='1234'){ localStorage.setItem('premium_unlocked','true'); location.reload(); } }
+    function getAISuggestion(ev, logs) {
+        if(logs.length < 2) return "Naya data add karein AI analysis ke liye.";
+        let l = parseFloat(logs[logs.length-1].score), p = parseFloat(logs[logs.length-2].score);
+        let name = ev.toLowerCase();
+        let status = (name.includes('m') || name.includes('sprint')) ? (l < p ? "Improvement!" : "Keep Working!") : (l > p ? "Improvement!" : "Keep Working!");
+        if(name.includes('m')) return `<b>🤖 AI Coach: ${status}</b> Workout: Wall drills karein. Diet: Complex carbs lein.`;
+        if(name.includes('jump')) return `<b>🤖 AI Coach: ${status}</b> Workout: Plyometrics karein. Diet: Protein badhayein.`;
+        return "Consistency banaye rakhein.";
+    }
 
     function saveData(type) {
         const pre = type === 'Practice' ? 'p' : 'm';
-        const n = document.getElementById(pre+'Name').value.trim();
-        const e = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
-        const s = document.getElementById(pre+'Score').value;
-        const d = document.getElementById(pre+'Date').value;
-        if(n && s && d) {
-            db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: s, date: d });
-            document.getElementById(pre+'Score').value = '';
+        const n = document.getElementById(pre+'Name').value.trim(), e = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value, s = document.getElementById(pre+'Score').value, d = document.getElementById(pre+'Date').value;
+        if(n && s && d) { db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: s, date: d }); document.getElementById(pre+'Score').value = ''; }
+    }
+
+    function deleteRecord(n, c, e, rid) { if(confirm("Delete?")) db.ref(`${ID}/data/${n}/${c}/${e}/${rid}`).remove(); }
+
+    db.ref(`${ID}/data`).on('value', snap => {
+        const data = snap.val();
+        renderTabDisplay('Practice', 'practice-display', data);
+        renderTabDisplay('Main', 'main-display', data);
+        renderFlashcards(data);
+    });
+
+    function renderTabDisplay(cat, divId, data) {
+        const target = document.getElementById(divId); target.innerHTML = '';
+        if(!data) return;
+        for(let n in data) if(data[n][cat]) {
+            const card = document.createElement('div'); card.className = 'card';
+            card.innerHTML = `<h4>👤 ${n}</h4><div class="event-scroller" id="scr-${divId}-${n}"></div>`;
+            target.appendChild(card);
+            for(let ev in data[n][cat]) {
+                const logs = Object.entries(data[n][cat][ev]).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date)-new Date(b.date));
+                const gid = `ch-${divId}-${n}-${ev}`.replace(/\s+/g,'-');
+                const box = document.createElement('div'); box.className = 'event-box';
+                box.innerHTML = `<strong>${ev}</strong><canvas id="${gid}"></canvas><div class="ai-box">${getAISuggestion(ev, logs)}</div><table class="data-table"><tbody>${logs.map(l=>`<tr><td>${l.date}</td><td>${l.score}</td><td><button class="del-btn" onclick="deleteRecord('${n}','${cat}','${ev}','${l.id}')">X</button></td></tr>`).join('')}</tbody></table>`;
+                card.querySelector('.event-scroller').appendChild(box);
+                setTimeout(() => initChart(gid, logs, cat, ev), 100);
+            }
         }
     }
 
-    function deleteRecord(n, c, e, id) { if(confirm("Delete entry?")) db.ref(`${ID}/data/${n}/${c}/${e}/${id}`).remove(); }
-    
-    // Main Data Listener
-    db.ref(`${ID}/data`).on('value', snap => {
-        const pDisp = document.getElementById('practice-display');
-        const mDisp = document.getElementById('main-display');
-        const fList = document.getElementById('flashcard-list');
-        pDisp.innerHTML = ''; mDisp.innerHTML = ''; fList.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-
+    function renderFlashcards(data) {
+        const list = document.getElementById('flashcard-list'); list.innerHTML = ''; if(!data) return;
         for(let n in data) {
-            // Flashcard for Analytics Tab
-            const fCard = document.createElement('div');
-            fCard.className = 'athlete-flashcard';
-            fCard.innerHTML = `<h3>👤 ${n}</h3><p>Tap to view Official & Practice Analytics</p>`;
-            fCard.onclick = () => openDetails(n, data[n]);
-            fList.appendChild(fCard);
-
-            // Practice & Official Display
-            for(let cat in data[n]) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<div style="font-weight:bold; margin-bottom:10px;">👤 ${n} (${cat})</div><div class="event-scroller" id="scr-${n}-${cat}"></div>`;
-                
-                for(let evKey in data[n][cat]) {
-                    const logs = Object.values(data[n][cat][evKey]);
-                    const box = document.createElement('div');
-                    box.className = 'event-box';
-                    box.innerHTML = `<strong>${evKey}</strong><table class="data-table"><tbody>${logs.slice(-3).map(l=>`<tr><td>${l.date}</td><td>${l.score}</td></tr>`).join('')}</tbody></table>`;
-                    card.querySelector('.event-scroller').appendChild(box);
-                }
-                if(cat==='Practice') pDisp.appendChild(card);
-                else mDisp.appendChild(card);
-            }
+            const f = document.createElement('div'); f.className = 'athlete-flashcard';
+            f.innerHTML = `<h3>👤 ${n}</h3><p>Tap to view Official & Practice Analytics</p>`;
+            f.onclick = () => openDetails(n, data[n]); list.appendChild(f);
         }
-    });
+    }
 
-    function openDetails(name, athleteData) {
+    function initChart(id, logs, cat, evName) {
+        const ctx = document.getElementById(id); if(!ctx) return;
+        new Chart(ctx, { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>parseFloat(l.score)), borderColor: cat==='Practice'?'#059669':'#dc2626', tension: 0.4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { reverse: evName.toLowerCase().includes('m') } } } });
+    }
+
+    function openDetails(n, athleteData) {
         document.getElementById('flashcard-list').style.display = 'none';
-        const dv = document.getElementById('detail-view');
-        const content = document.getElementById('detail-content');
-        dv.style.display = 'block';
-        content.innerHTML = `<h3 style="text-align:center">Performance History: ${name}</h3>`;
-
+        const dv = document.getElementById('detail-view'), content = document.getElementById('detail-content');
+        dv.style.display = 'block'; content.innerHTML = `<h3 style="text-align:center">${n}'s Hub</h3>`;
         for(let cat in athleteData) {
-            const catHeader = document.createElement('h4');
-            catHeader.innerText = cat + " Sessions";
-            catHeader.style.color = cat === 'Practice' ? 'var(--practice)' : 'var(--main)';
-            content.appendChild(catHeader);
-
-            const scroller = document.createElement('div');
-            scroller.className = 'event-scroller';
-
+            const scroller = document.createElement('div'); scroller.className = 'event-scroller';
             for(let ev in athleteData[cat]) {
                 const logs = Object.entries(athleteData[cat][ev]).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date)-new Date(b.date));
-                const gid = `chart-${name}-${cat}-${ev}`.replace(/\s+/g,'-');
-                const box = document.createElement('div');
-                box.className = 'event-box';
-                box.innerHTML = `<strong>${ev}</strong><canvas id="${gid}"></canvas>
-                                 <table class="data-table"><tbody>${logs.map(l=>`<tr><td>${l.date}</td><td><b>${l.score}</b></td><td><button class="del-btn" onclick="deleteRecord('${name}','${cat}','${ev}','${l.id}')">X</button></td></tr>`).join('')}</tbody></table>`;
-                scroller.appendChild(box);
-                setTimeout(() => {
-                    const ctx = document.getElementById(gid);
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>parseFloat(l.score)), borderColor: '#1e40af', tension: 0.4 }] },
-                        options: { plugins: { legend: { display: false } } }
-                    });
-                }, 100);
+                const gid = `det-${n}-${cat}-${ev}`.replace(/\s+/g,'-');
+                const box = document.createElement('div'); box.className = 'event-box';
+                box.innerHTML = `<strong>${cat}: ${ev}</strong><canvas id="${gid}"></canvas><div class="ai-box">${getAISuggestion(ev, logs)}</div><table class="data-table"><tbody>${logs.map(l=>`<tr><td>${l.date}</td><td>${l.score}</td><td><button class="del-btn" onclick="deleteRecord('${n}','${cat}','${ev}','${l.id}')">X</button></td></tr>`).join('')}</tbody></table>`;
+                scroller.appendChild(box); setTimeout(() => initChart(gid, logs, cat, ev), 100);
             }
             content.appendChild(scroller);
         }
     }
 
-    function closeDetails() {
-        document.getElementById('flashcard-list').style.display = 'block';
-        document.getElementById('detail-view').style.display = 'none';
-    }
+    function closeDetails() { document.getElementById('flashcard-list').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
 
+    // GLOBAL REVIEWS (FIXED LISTENER)
     function submitReview() {
-        const n = document.getElementById('revName').value.trim();
-        const r = document.getElementById('revRole').value;
-        const s = document.getElementById('revStars').value;
-        const m = document.getElementById('revText').value.trim();
-        if(n && m) {
-            // Updated to use GLOBAL_REVIEWS node for global access
-            db.ref(`GLOBAL_REVIEWS`).push({ name: n, role: r, stars: parseInt(s), message: m });
-            document.getElementById('revText').value = '';
+        const n = document.getElementById('revName').value.trim(), m = document.getElementById('revText').value.trim();
+        if(n && m && selectedStars > 0) {
+            db.ref(`GLOBAL_REVIEWS`).push({ name: n, stars: selectedStars, message: m, ts: Date.now() }).then(() => {
+                document.getElementById('revText').value = ''; setStar(0);
+            });
         }
     }
 
-    // Listener for Global Reviews
     db.ref(`GLOBAL_REVIEWS`).on('value', snap => {
         const wall = document.getElementById('reviewWall');
         document.getElementById('revCount').innerText = snap.numChildren();
         wall.innerHTML = '';
-        let revs = [];
-        snap.forEach(c => revs.push(c.val()));
-        revs.reverse().forEach(d => {
-            wall.innerHTML += `<div class="card" style="border-left:5px solid var(--ai-purple)"><b>${d.name}</b> <small>(${d.role})</small> ${'⭐'.repeat(d.stars)}<p style="font-size:12px; margin-top:5px;">${d.message}</p></div>`;
+        const reviews = [];
+        snap.forEach(c => { reviews.push(c.val()); });
+        reviews.sort((a, b) => b.ts - a.ts).forEach(d => {
+            const div = document.createElement('div'); div.className = 'card';
+            div.style.borderLeft = "5px solid var(--ai-purple)";
+            div.innerHTML = `<b>${d.name}</b> <span style="color:#fbbf24">${'★'.repeat(d.stars)}</span><p style="font-size:13px; margin-top:5px;">${d.message}</p>`;
+            wall.appendChild(div);
         });
     });
-
-    function askAdvancedCoach() {
-        const i = document.getElementById('chat-in'); const w = document.getElementById('chat-window');
-        if(!i.value) return;
-        w.innerHTML += `<div class="msg msg-user">${i.value}</div>`;
-        setTimeout(() => {
-            w.innerHTML += `<div class="msg msg-bot">Consistency is key! Trends dikha rahe hain ki aapki performance improve ho rahi hai. Diet aur recovery par focus rakhein.</div>`;
-            w.scrollTop = w.scrollHeight;
-        }, 800);
-        i.value = '';
-    }
 </script>
 </body>
 </html>
