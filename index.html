@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Pro AI - v40 Final</title>
+    <title>Elite Performance Pro AI - v42 Final</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,13 +15,16 @@
         .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
         .container.active { display: block; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scrollbar-width: thin; }
-        .graph-card { min-width: 280px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 15px; position: relative; }
-        .del-btn { position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #dc2626; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .ai-advice { background:#f0f7ff; padding:10px; border-radius:10px; font-size:11px; margin-top:8px; border-left: 3px solid var(--primary); }
+        .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; }
+        .graph-card { min-width: 300px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 15px; }
+        .data-list { margin-top: 10px; font-size: 12px; max-height: 120px; overflow-y: auto; background: #fcfcfc; border-radius: 10px; padding: 5px; }
+        .data-item { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid #eee; }
+        .mini-del { color: #dc2626; background: #fee2e2; border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 10px; }
+        .rev-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .stars { color: #f59e0b; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -30,7 +33,6 @@
         <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
         <div class="nav-btn" onclick="showTab('m-page', this)">MAIN</div>
         <div class="nav-btn" onclick="showTab('d-page', this)">DASHBOARD</div>
-        <div class="nav-btn" onclick="showTab('a-page', this)">AI COACH PRO</div>
         <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
@@ -66,25 +68,37 @@
         <div id="main-live-view"></div>
     </div>
 
+    <div id="v-page" class="container">
+        <h2>💬 User Reviews (<span id="revCount">0</span>)</h2>
+        <div class="card">
+            <input type="text" id="revName" placeholder="Your Name">
+            <select id="revStars">
+                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                <option value="3">⭐⭐⭐ (3/5)</option>
+                <option value="2">⭐⭐ (2/5)</option>
+                <option value="1">⭐ (1/5)</option>
+            </select>
+            <textarea id="revText" placeholder="Write your feedback..."></textarea>
+            <button class="btn" style="background: var(--premium)" onclick="submitReview()">POST REVIEW</button>
+        </div>
+        <div id="reviewWall" class="card"></div>
+    </div>
+
     <div id="d-page" class="container"><h2>📊 Dashboard</h2><div id="displayArea"></div></div>
-    <div id="a-page" class="container"><div id="lock-screen" class="card"><h3>Premium Locked 🔒</h3><input type="text" id="actCode" placeholder="Code 1234"><button class="btn" onclick="unlock()">UNLOCK</button></div><div id="ai-content" style="display:none;"><div class="card"><h4>AI Chat</h4><div id="chat-wall" style="height:150px; overflow:auto; background:#eee; padding:10px; border-radius:10px;"></div><input type="text" id="chat-in"><button onclick="askAI()">Send</button></div><div id="roadmap-wall"></div></div></div>
-    <div id="v-page" class="container"><h2>💬 Reviews</h2><div class="card"><input type="text" id="rUser" placeholder="Name"><textarea id="rMsg" placeholder="Review"></textarea><button class="btn" style="background:#10b981" onclick="postReview()">POST</button></div><div id="reviewWall"></div></div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ID = 'user_v40_final';
+    const ID = 'user_v42_final';
 
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
-        if(id === 'a-page' && localStorage.getItem('premium')==='true') { document.getElementById('lock-screen').style.display='none'; document.getElementById('ai-content').style.display='block'; genRoadmap(); }
     }
-
-    function unlock() { if(document.getElementById('actCode').value === '1234') { localStorage.setItem('premium', 'true'); location.reload(); } }
 
     function saveData(type) {
         const p = type === 'Practice' ? 'p' : 'm';
@@ -94,40 +108,63 @@
         const date = document.getElementById(p+'Date').value;
         if(name && score && date) { 
             db.ref(`${ID}/data/${name}/${type}/${event.replace(/\s/g,'')}`).push({ score, date, ts: Date.now(), event }); 
-            alert(`✅ ${type} Saved for ${name}!`); 
+            // No notification on save
             document.getElementById(p+'Score').value = '';
         }
     }
 
-    // DELETE FUNCTION
-    function deleteRecord(name, cat, eventKey) {
-        if(confirm("Bhai, kya aap sachi mein ye record delete karna chahte ho?")) {
-            db.ref(`${ID}/data/${name}/${cat}/${eventKey}`).remove();
-            alert("Record Deleted!");
+    function deleteEntry(name, cat, eventKey, entryKey) {
+        if(confirm("Delete this entry?")) {
+            db.ref(`${ID}/data/${name}/${cat}/${eventKey}/${entryKey}`).remove();
+            alert("Entry Deleted!"); // Notification only on delete
         }
     }
 
+    function submitReview() {
+        const name = document.getElementById('revName').value;
+        const rating = document.getElementById('revStars').value;
+        const msg = document.getElementById('revText').value;
+        if(name && msg) {
+            db.ref(`${ID}/reviews`).push({ name, rating, msg, date: new Date().toLocaleDateString() });
+            document.getElementById('revName').value = "";
+            document.getElementById('revText').value = "";
+        }
+    }
+
+    db.ref(`${ID}/reviews`).on('value', snap => {
+        const wall = document.getElementById('reviewWall');
+        const count = document.getElementById('revCount');
+        wall.innerHTML = '';
+        let total = 0;
+        snap.forEach(c => {
+            const d = c.val();
+            let s = "⭐".repeat(d.rating);
+            wall.innerHTML = `<div class="rev-item"><b>${d.name}</b> <span class="stars">${s}</span><br><small>${d.date}</small><p>${d.msg}</p></div>` + wall.innerHTML;
+            total++;
+        });
+        count.innerText = total;
+    });
+
     db.ref(`${ID}/data`).on('value', snap => {
-        const dashboard = document.getElementById('displayArea');
         const pView = document.getElementById('practice-live-view');
         const mView = document.getElementById('main-live-view');
-        dashboard.innerHTML = ''; pView.innerHTML = ''; mView.innerHTML = '';
+        const dash = document.getElementById('displayArea');
+        pView.innerHTML = ''; mView.innerHTML = ''; dash.innerHTML = '';
         const data = snap.val(); if(!data) return;
 
         for(let name in data) {
+            const dCard = document.createElement('div'); dCard.className = 'card'; dCard.innerHTML = `<h3>👤 ${name} Dashboard</h3>`; dash.appendChild(dCard);
             for(let cat in data[name]) {
                 const target = cat === 'Practice' ? pView : mView;
-                const section = document.createElement('div');
-                section.innerHTML = `<h4>👤 ${name} - ${cat}</h4><div class="scroll-x" id="sc-${cat}-${name}"></div>`;
-                target.appendChild(section);
-
+                const section = document.createElement('div'); section.innerHTML = `<h4>👤 ${name} - ${cat}</h4><div class="scroll-x" id="sc-${cat}-${name}"></div>`; target.appendChild(section);
                 for(let e in data[name][cat]) {
                     const logs = Object.entries(data[name][cat][e]).map(([key, val]) => ({key, ...val})).sort((a,b)=>a.ts-b.ts);
                     const gid = `g-${cat}-${name}-${e}`.replace(/\s/g,'');
                     const gc = document.createElement('div'); gc.className = 'graph-card';
-                    gc.innerHTML = `<button class="del-btn" onclick="deleteRecord('${name}','${cat}','${e}')">X</button>
-                                    <b>${e}</b><canvas id="${gid}"></canvas>
-                                    <div class="ai-advice"><b>AI:</b> Focus on form. Record: ${logs[logs.length-1].score} (${logs[logs.length-1].date})</div>`;
+                    let listHTML = `<div class="data-list">`;
+                    logs.forEach(l => { listHTML += `<div class="data-item"><span>📅 ${l.date} - <b>${l.score}</b></span><button class="mini-del" onclick="deleteEntry('${name}','${cat}','${e}','${l.key}')">Del</button></div>`; });
+                    listHTML += `</div>`;
+                    gc.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas>${listHTML}`;
                     document.getElementById(`sc-${cat}-${name}`).appendChild(gc);
                     setTimeout(() => renderG(gid, logs), 500);
                 }
@@ -139,14 +176,9 @@
         new Chart(document.getElementById(id), {
             type: 'line',
             data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.4 }] },
-            options: { plugins:{legend:{display:false}}, scales:{x:{display:true}} } // Date display fixed
+            options: { plugins:{legend:{display:false}}, scales:{x:{display:true}} }
         });
     }
-
-    function postReview() { /* Logic same as v39 */ }
-    db.ref(`${ID}/reviews`).on('value', snap => { /* Logic same as v39 */ });
-    function askAI() { /* Logic same as v39 */ }
-    function genRoadmap() { /* Logic same as v39 */ }
 </script>
 </body>
 </html>
