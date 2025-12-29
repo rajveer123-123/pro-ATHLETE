@@ -3,41 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recovery Pro - AI Athlete System</title>
+    <title>Recovery Pro - Professional Athlete System</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --practice: #10b981; --main: #ef4444; --bg: #f1f5f9; --ai: #8b5cf6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-top: 70px; }
+        :root { --primary: #2563eb; --practice: #10b981; --main: #ef4444; --bg: #f8fafc; --ai: #8b5cf6; --gold: #f59e0b; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 70px; color: #1e293b; }
         
         /* Navigation */
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; height: 60px; overflow-x: auto; }
-        .nav-btn { min-width: 80px; flex: 1; border: none; background: none; font-size: 10px; font-weight: bold; color: #64748b; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #f0f7ff; }
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 1px 5px rgba(0,0,0,0.1); z-index: 1000; height: 65px; }
+        .nav-btn { flex: 1; border: none; background: none; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #eff6ff; }
 
-        .container { padding: 15px; display: none; max-width: 800px; margin: auto; animation: fadeIn 0.3s; }
+        .container { padding: 15px; display: none; max-width: 900px; margin: auto; animation: fadeIn 0.4s ease; }
         .container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
+        /* Athlete Flashcards */
+        .athlete-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 8px solid var(--ai); cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
+        .athlete-card:hover { transform: scale(1.02); }
+        .pb-badge { background: #f1f5f9; padding: 8px 12px; border-radius: 12px; font-size: 13px; border: 1px solid #e2e8f0; }
 
-        /* AI Chat Box */
-        #chat-window { height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; border-radius: 10px; }
-        .msg { padding: 10px; border-radius: 10px; max-width: 80%; font-size: 14px; }
-        .user-msg { align-self: flex-end; background: var(--primary); color: white; }
-        .ai-msg { align-self: flex-start; background: var(--ai); color: white; }
+        /* Scrollable Graphs */
+        .graph-wrapper { overflow-x: auto; background: white; border-radius: 15px; padding: 15px; margin-top: 10px; border: 1px solid #e2e8f0; }
+        .graph-scroll { min-width: 700px; height: 300px; }
 
-        /* Data Analysis Flex */
-        .analysis-grid { display: flex; flex-wrap: wrap; gap: 15px; }
-        .event-card { flex: 1; min-width: 300px; background: white; border-radius: 15px; padding: 15px; border: 1px solid #eee; position: relative; }
-        .del-x { position: absolute; top: 10px; right: 10px; background: #fee2e2; color: red; border: none; border-radius: 50%; cursor: pointer; font-weight: bold; width: 25px; height: 25px; }
-        
-        .live-tag { background: #000; color: #fbbf24; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; }
-        canvas { width: 100% !important; height: 180px !important; }
+        /* Star Rating */
+        .star-rating { display: flex; gap: 5px; margin: 10px 0; font-size: 25px; cursor: pointer; }
+        .star { color: #cbd5e1; transition: 0.2s; }
+        .star.selected { color: var(--gold); }
+
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+
+        #chat-window { height: 350px; overflow-y: auto; background: #fff; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #e2e8f0; }
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 14px; }
+        .user-msg { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .ai-msg { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -45,17 +49,17 @@
     <div class="nav">
         <div class="nav-btn active" onclick="showTab('p-page', this)"><span>🏃</span>PRACTICE</div>
         <div class="nav-btn" onclick="showTab('m-page', this)"><span>🏆</span>OFFICIAL</div>
-        <div class="nav-btn" onclick="showTab('d-page', this)"><span>📊</span>DATA</div>
-        <div class="nav-btn" onclick="showTab('a-page', this)"><span>🧠</span>AI CHAT</div>
+        <div class="nav-btn" onclick="showTab('d-page', this)"><span>📊</span>DASHBOARD</div>
+        <div class="nav-btn" onclick="showTab('a-page', this)"><span>🧠</span>AI COACH</div>
         <div class="nav-btn" onclick="showTab('v-page', this)"><span>⭐</span>REVIEWS</div>
     </div>
 
     <div id="p-page" class="container active">
-        <div class="card">
-            <h3>🏃 Add Practice Log</h3>
+        <div style="background: white; padding: 20px; border-radius: 20px;">
+            <h3>🏃 Practice Session</h3>
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-               <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
+                <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
                     <option>120m</option><option>150m</option><option>180m</option><option>300m</option>
                 </optgroup>
                 <optgroup label="Jumps (Distance)">
@@ -66,19 +70,19 @@
                     <option>Ball Throw</option><option>Back Throw</option>
                 </optgroup>
                 
-            <input type="number" step="0.01" id="pScore" placeholder="Score">
+            </select>
+            <input type="number" step="0.01" id="pScore" placeholder="Score (Time or Distance)">
             <input type="date" id="pDate">
-            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
         </div>
-        <div id="practice-charts" class="analysis-grid"></div>
     </div>
 
     <div id="m-page" class="container">
-        <div class="card">
-            <h3>🏆 Add Official Trial</h3>
+        <div style="background: white; padding: 20px; border-radius: 20px;">
+            <h3>🏆 Official Meet Score</h3>
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-               <optgroup label="Track Events (Running)">
+                <optgroup label="Track Events (Running)">
                     <option value="100m">100 Metre</option>
                     <option value="200m">200 Metre</option>
                     <option value="400m">400 Metre</option>
@@ -100,51 +104,57 @@
                 </optgroup>
                 
             </select>
-            <input type="number" step="0.01" id="mScore" placeholder="Official Score">
+            <input type="number" step="0.01" id="mScore" placeholder="Final Score">
             <input type="date" id="mDate">
-            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL</button>
-        </div>
-        <div id="main-charts" class="analysis-grid"></div>
-    </div>
-
-    <div id="a-page" class="container">
-        <div class="card">
-            <h3>🧠 AIA Interactive Coach</h3>
-            <div id="chat-window">
-                <div class="msg ai-msg">Hello! Main aapka AI Coach hoon. Training ya recovery ke baare mein kuch bhi puchiye.</div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <input type="text" id="chatInput" placeholder="Puchiye: 'Sprints kaise sudharein?'">
-                <button onclick="askAI()" style="background:var(--ai); color:white; border:none; border-radius:10px; padding:0 20px; cursor:pointer;">SEND</button>
-            </div>
+            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">PUBLISH OFFICIAL</button>
         </div>
     </div>
 
     <div id="d-page" class="container">
-        <div class="live-tag">📊 FULL FLEX PERFORMANCE DASHBOARD</div>
-        <div id="flex-analysis" class="analysis-grid"></div>
+        <div id="athlete-cards-grid"></div>
+        
+        <div id="detail-view" style="display:none;">
+            <button onclick="closeDetails()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer; margin-bottom:15px;">← BACK TO ALL ATHLETES</button>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <div id="a-page" class="container">
+        <div id="chat-window"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <input type="text" id="chatInput" placeholder="Puchiye: Sprint speed kaise badhayein?">
+            <button onclick="askAI()" style="background:var(--ai); color:white; border:none; border-radius:12px; padding:0 25px; cursor:pointer; font-weight:bold;">SEND</button>
+        </div>
     </div>
 
     <div id="v-page" class="container">
-        <div class="live-tag">🌍 GLOBAL FEEDBACK COUNTER: <span id="revCount">0</span></div>
-        <div class="card">
-            <h3>⭐ Rate & Review</h3>
-            <input type="text" id="revName" placeholder="Name">
-            <select id="revRole"><option>Athlete</option><option>Coach</option><option>Student</option></select>
-            <textarea id="revText" placeholder="Share your experience..."></textarea>
-            <button class="btn" style="background: var(--ai)" onclick="submitReview()">POST GLOBALLY</button>
+        <div style="background:black; color:white; padding:15px; border-radius:15px; text-align:center; margin-bottom:15px;">
+            GLOBAL REVIEWS: <span id="revCount" style="color:var(--gold); font-size:20px;">0</span>
+        </div>
+        <div style="background:white; padding:20px; border-radius:20px; margin-bottom:20px;">
+            <h3>⭐ Rate our AI System</h3>
+            <div class="star-rating" id="starContainer">
+                <span class="star" onclick="setStar(1)">★</span>
+                <span class="star" onclick="setStar(2)">★</span>
+                <span class="star" onclick="setStar(3)">★</span>
+                <span class="star" onclick="setStar(4)">★</span>
+                <span class="star" onclick="setStar(5)">★</span>
+            </div>
+            <input type="text" id="revName" placeholder="Your Name">
+            <textarea id="revText" placeholder="Write your feedback here..."></textarea>
+            <button class="btn" style="background: var(--primary)" onclick="submitReview()">POST GLOBALLY</button>
         </div>
         <div id="reviewWall"></div>
     </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ID = 'Elite_AI_' + (localStorage.getItem('athlete_dev_id') || Math.random().toString(36).substr(2, 6));
+    const ID = 'PRO_SYSTEM_' + (localStorage.getItem('athlete_dev_id') || Math.random().toString(36).substr(2, 6));
     localStorage.setItem('athlete_dev_id', ID);
 
-    let charts = {};
+    let selectedStars = 0;
 
     function showTab(t, b) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
@@ -153,7 +163,14 @@
         b.classList.add('active');
     }
 
-    // Data Management
+    // Rating Logic
+    function setStar(n) {
+        selectedStars = n;
+        const stars = document.querySelectorAll('.star');
+        stars.forEach((s, i) => s.classList.toggle('selected', i < n));
+    }
+
+    // Save Data (No Alerts)
     function saveData(type) {
         const p = type === 'Practice' ? 'p' : 'm';
         const n = document.getElementById(p+'Name').value;
@@ -162,84 +179,118 @@
         const d = document.getElementById(p+'Date').value;
         if(n && s && d) {
             db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: parseFloat(s), date: d });
-            alert("Saved!");
+            document.getElementById(p+'Score').value = ''; 
         }
     }
 
-    function deleteEntry(n, t, e, k) {
-        if(confirm("Delete this record?")) db.ref(`${ID}/data/${n}/${t}/${e}/${k}`).remove();
-    }
-
-    // AI Chat Logic
+    // AI Coach (Advanced)
     function askAI() {
         const inp = document.getElementById('chatInput');
         const win = document.getElementById('chat-window');
         if(!inp.value) return;
-
         win.innerHTML += `<div class="msg user-msg">${inp.value}</div>`;
-        const q = inp.value.toLowerCase();
-        let reply = "Mujhe is baare mein abhi aur seekhna hai, par aap practice jari rakhein!";
         
-        if(q.includes("sprint")) reply = "Sprint speed badhane ke liye 'Knee Drive' aur 'High Frequency' drills karein.";
-        if(q.includes("pain")) reply = "Agar dard hai toh 'RICE' technique use karein aur doctor se milein.";
-        if(q.includes("diet")) reply = "Protein rich foods (eggs, paneer, soy) recovery ke liye best hain.";
+        let q = inp.value.toLowerCase();
+        let r = "Consistency is the key! Keep tracking your scores and focus on recovery.";
+        
+        if(q.includes("sprint")) r = "For Sprints: Focus on 'Knee Drive' and 'Explosive Start'. Plyometric training like box jumps will help.";
+        if(q.includes("pain") || q.includes("injury")) r = "Rest is vital. Apply Ice for 15 mins and consult a physiotherapist if the pain persists.";
+        if(q.includes("diet")) r = "Increase protein (eggs, lean meat, lentils) and stay hydrated. 3-4 liters of water is essential.";
         
         setTimeout(() => {
-            win.innerHTML += `<div class="msg ai-msg">🤖: ${reply}</div>`;
+            win.innerHTML += `<div class="msg ai-msg">🤖 <b>Coach:</b> ${r}</div>`;
             win.scrollTop = win.scrollHeight;
-        }, 800);
+        }, 500);
         inp.value = '';
     }
 
-    // Real-time Dashboard with Flex Analysis
+    // Real-time Dashboard & Flashcards
     db.ref(`${ID}/data`).on('value', snap => {
         const data = snap.val();
-        const flexBox = document.getElementById('flex-analysis');
-        const practiceBox = document.getElementById('practice-charts');
-        const mainBox = document.getElementById('main-charts');
-        
-        [flexBox, practiceBox, mainBox].forEach(b => b.innerHTML = '');
+        const grid = document.getElementById('athlete-cards-grid');
+        grid.innerHTML = '';
         if(!data) return;
 
         for(let athlete in data) {
+            let pbs = [];
             for(let type in data[athlete]) {
                 for(let event in data[athlete][type]) {
-                    const logs = Object.entries(data[athlete][type][event]).map(([k,v])=>({k,...v}));
-                    const gid = `ch-${athlete}-${type}-${event}`.replace(/\s/g,'');
-                    
-                    const card = document.createElement('div');
-                    card.className = 'event-card';
-                    card.innerHTML = `<h4>👤 ${athlete} - ${event} (${type})</h4><canvas id="${gid}"></canvas>`;
-                    
-                    logs.forEach(l => {
-                        card.innerHTML += `<div style="font-size:11px; margin-top:5px;">📅 ${l.date}: <b>${l.score}</b> <button class="del-x" onclick="deleteEntry('${athlete}','${type}','${event}','${l.k}')">X</button></div>`;
-                    });
-
-                    if(type === 'Practice') practiceBox.appendChild(card.cloneNode(true));
-                    else mainBox.appendChild(card.cloneNode(true));
-                    flexBox.appendChild(card);
-
-                    setTimeout(() => {
-                        const ctx = document.getElementById(gid);
-                        if(charts[gid]) charts[gid].destroy();
-                        charts[gid] = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: logs.map(l=>l.date),
-                                datasets: [{ label: athlete, data: logs.map(l=>l.score), borderColor: type==='Practice'?'#10b981':'#ef4444', tension: 0.3 }]
-                            }
-                        });
-                    }, 200);
+                    const scores = Object.values(data[athlete][type][event]).map(l => l.score);
+                    const isTimed = event.toLowerCase().includes('m') || event.toLowerCase().includes('sprint');
+                    const pb = isTimed ? Math.min(...scores) : Math.max(...scores);
+                    pbs.push(`<div class="pb-badge"><b>${event}:</b> ${pb}</div>`);
                 }
             }
+
+            const card = document.createElement('div');
+            card.className = 'athlete-card';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0;">👤 ${athlete}</h2>
+                    <span style="font-size:12px; font-weight:bold; color:var(--ai);">CLICK TO ANALYZE →</span>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:15px;">${pbs.join('')}</div>
+            `;
+            card.onclick = () => showAthleteDetails(athlete, data[athlete]);
+            grid.appendChild(card);
         }
     });
+
+    function showAthleteDetails(name, athleteData) {
+        document.getElementById('athlete-cards-grid').style.display = 'none';
+        const view = document.getElementById('detail-view');
+        const content = document.getElementById('detail-content');
+        view.style.display = 'block';
+        content.innerHTML = `<h1>Performance: ${name}</h1>`;
+
+        for(let type in athleteData) {
+            for(let event in athleteData[type]) {
+                const logs = Object.entries(athleteData[type][event]).map(([k,v])=>({k,...v}));
+                const gid = `ch-${name}-${type}-${event}`.replace(/\s/g,'');
+                
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <h3>${type}: ${event} (Slide to see history)</h3>
+                    <div class="graph-wrapper">
+                        <div class="graph-scroll"><canvas id="${gid}"></canvas></div>
+                    </div><br>
+                `;
+                content.appendChild(wrapper);
+
+                setTimeout(() => {
+                    new Chart(document.getElementById(gid), {
+                        type: 'line',
+                        data: {
+                            labels: logs.map(l=>l.date),
+                            datasets: [{ 
+                                label: 'Performance Score', 
+                                data: logs.map(l=>l.score), 
+                                borderColor: type==='Practice'?'#10b981':'#ef4444', 
+                                tension: 0.3,
+                                fill: true,
+                                backgroundColor: 'rgba(37, 99, 235, 0.05)'
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, responsive: true }
+                    });
+                }, 150);
+            }
+        }
+    }
+
+    function closeDetails() {
+        document.getElementById('athlete-cards-grid').style.display = 'block';
+        document.getElementById('detail-view').style.display = 'none';
+    }
 
     // Global Review Logic
     function submitReview() {
         const n = document.getElementById('revName').value;
         const t = document.getElementById('revText').value;
-        if(n && t) db.ref(`GLOBAL_FEEDBACKS`).push({ name: n, text: t, role: document.getElementById('revRole').value });
+        if(n && t && selectedStars > 0) {
+            db.ref(`GLOBAL_FEEDBACKS`).push({ name: n, text: t, stars: selectedStars });
+            alert("Feedback Posted Globally!");
+        } else { alert("Please select stars and enter name!"); }
     }
 
     db.ref(`GLOBAL_FEEDBACKS`).on('value', snap => {
@@ -248,7 +299,13 @@
         wall.innerHTML = '';
         snap.forEach(c => {
             const v = c.val();
-            wall.innerHTML = `<div class="card"><b>${v.name} (${v.role})</b><p>${v.text}</p></div>` + wall.innerHTML;
+            let stars = "⭐".repeat(v.stars);
+            wall.innerHTML = `
+                <div style="background:white; padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #eee;">
+                    <div style="color:var(--gold)">${stars}</div>
+                    <b>${v.name}</b>
+                    <p style="margin:5px 0 0 0; color:#64748b;">${v.text}</p>
+                </div>` + wall.innerHTML;
         });
     });
 </script>
