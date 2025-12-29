@@ -33,6 +33,8 @@
         <div class="nav-btn" onclick="showTab('page-main', this)">MAIN</div>
         <div class="nav-btn" onclick="showTab('page-dash', this)">DASHBOARD</div>
         <div class="nav-btn" onclick="showTab('page-reports', this)">AI REPORTS</div>
+        <div class="nav-btn" onclick="showTab('page-review', this)">REVIEWS</div>
+    
     </div>
 
     <div id="page-practice" class="container active">
@@ -76,119 +78,71 @@
         </div>
     </div>
 
-    <div id="page-dash" class="container">
-        <h2>📊 Performance Dashboard</h2>
+    <div id="page-dash" class="container active" style="display: block;">
+        <h2>📊 Performance Analytics</h2>
         <div id="displayArea"></div>
     </div>
 
-<script>
-    // Config & Setup
-    const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    
-    let userID = localStorage.getItem('athleteTracker_ID') || 'rajveer_v32_final';
-    let installDate = localStorage.getItem('install_date') || Date.now();
-    localStorage.setItem('athleteTracker_ID', userID);
-    localStorage.setItem('install_date', installDate);
+    <div id="page-review" class="container" style="display: none;">
+        <h2 style="color: #f59e0b">💬 Athlete & Coach Reviews</h2>
+        <div class="card">
+            <input type="text" id="revAthlete" placeholder="Athlete Name">
+            <div class="star-rating" id="starInput" style="font-size: 30px; color: #cbd5e1; cursor: pointer; text-align: center; margin-bottom: 10px;">
+                <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
+            </div>
+            <textarea id="revMsg" placeholder="Feedback likhein..."></textarea>
+            <button class="btn" style="background: #f59e0b" onclick="submitReview()">SUBMIT REVIEW</button>
+        </div>
+        <div id="reviewWall"></div>
+    </div>
 
-    function showTab(id, btn) {
-        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-        if(id === 'page-reports') checkSubscription();
-    }
+    <script>
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBXlSIIG2czsrkYMJ07Hibxqd7jpOQR0", 
+            databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    // AI Advice Generator
-    function getSmartAdvice(event) {
-        if(event.includes('Sprint') || event.includes('100m')) return "SPEED: Work on 'Wicket Runs' for stride frequency and high knees.";
-        if(event.includes('Jump')) return "POWER: Focus on explosive take-offs. Add 'Box Jumps' and 'Depth Jumps'.";
-        if(event.includes('Throw') || event.includes('Put')) return "STRENGTH: Focus on hip rotation and 'Med Ball Slams' for explosive release.";
-        return "Maintain consistent practice and focus on recovery.";
-    }
+        // Aapka User ID
+        let userID = localStorage.getItem('athleteTracker_ID') || 'user_v32_final';
 
-    // Payment Logic
-    function submitPayment() {
-        const utr = document.getElementById('userUtr').value;
-        if(utr.length < 6) return alert("Enter valid Transaction ID");
-        localStorage.setItem('premium_unlocked', 'true');
-        db.ref(`${userID}/payments`).push({ utr, date: new Date().toLocaleString() });
-        alert("Payment Submitted! Reports Unlocked.");
-        location.reload();
-    }
-
-    function checkSubscription() {
-        const isUnlocked = localStorage.getItem('premium_unlocked');
-        const daysUsed = Math.floor((Date.now() - parseInt(installDate)) / (1000*60*60*24));
-        if (isUnlocked === 'true' || daysUsed < 30) {
-            document.getElementById('reports-list').style.display = 'block';
-            document.getElementById('paywall-screen').style.display = 'none';
-        } else {
-            document.getElementById('reports-list').style.display = 'none';
-            document.getElementById('paywall-screen').style.display = 'block';
-            const upi = localStorage.getItem('owner_upi') || 'coach@upi';
-            document.getElementById('payment-box').innerHTML = `<a href="upi://pay?pa=${upi}&am=499&cu=INR" class="pay-link">PAY VIA UPI</a>`;
+        // Navigation control
+        function showTab(id, btn) {
+            document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const target = document.getElementById(id);
+            if(target) target.style.display = 'block';
+            btn.classList.add('active');
         }
-    }
 
-    // Save Data
-    function saveData(type) {
-        const pre = type === 'Practice' ? 'p' : 'm';
-        const name = document.getElementById(pre+'Name').value.trim();
-        const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
-        const date = document.getElementById(pre+'Date').value;
-        const score = parseFloat(document.getElementById(pre+'Score').value);
-        if(!name || !date || isNaN(score)) return alert("Fill all fields");
-        db.ref(`${userID}/data/${name}/${event.replace(/\s/g,'')}`).push({ type, event, date, score, ts: Date.now() });
-        document.getElementById(pre+'Score').value = '';
-    }
+        // Review Logic
+        let currentRating = 0;
+        function setRating(n) { 
+            currentRating = n; 
+            const stars = document.getElementById('starInput').children; 
+            for(let i=0; i<5; i++) stars[i].style.color = i < n ? '#fbbf24' : '#cbd5e1'; 
+        }
 
-    // Display & Analysis
-    db.ref(`${userID}/data`).on('value', snap => {
-        const area = document.getElementById('displayArea');
-        const rList = document.getElementById('reports-list');
-        area.innerHTML = ''; rList.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-
-        for(let name in data) {
-            const card = document.createElement('div'); card.className = 'athlete-card';
-            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${name.replace(/\s/g,'')}"></div>`;
-            area.appendChild(card);
-            let rHTML = `<div class="report-card"><h3>${name} Analysis</h3>`;
-
-            for(let eKey in data[name]) {
-                const logs = Object.values(data[name][eKey]).sort((a,b)=>a.ts - b.ts);
-                const latest = logs[logs.length-1];
-                rHTML += `<p><b>${latest.event}:</b> Last Score ${latest.score}</p>
-                          <div class="ai-box"><b>AI Coach:</b> ${getSmartAdvice(latest.event)}</div>`;
-                
-                const gCard = document.createElement('div'); gCard.className = 'graph-card';
-                gCard.innerHTML = `<small>${latest.event}</small><canvas id="c-${name.replace(/\s/g,'')}-${eKey}"></canvas>`;
-                document.getElementById(`sc-${name.replace(/\s/g,'')}`).appendChild(gCard);
-                
-                setTimeout(() => {
-                    new Chart(document.getElementById(`c-${name.replace(/\s/g,'')}-${eKey}`), {
-                        type: 'line',
-                        data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.3 }] },
-                        options: { scales:{x:{display:false}}, plugins:{legend:{display:false}} }
-                    });
-                }, 100);
+        function submitReview() {
+            const athlete = document.getElementById('revAthlete').value;
+            const msg = document.getElementById('revMsg').value;
+            if(athlete && msg && currentRating > 0) {
+                db.ref(`${userID}/reviews`).push({ athlete, rating: currentRating, msg, date: new Date().toLocaleDateString() });
+                alert("Review Saved!");
+                setRating(0); document.getElementById('revMsg').value = ''; document.getElementById('revAthlete').value = '';
             }
-            rHTML += `</div>`;
-            rList.innerHTML += rHTML;
         }
-    });
 
-    // Admin Password Setting
-    function adminCheck() {
-        let p = prompt("Password:");
-        if(p === "1234") {
-            let u = prompt("Enter your UPI ID (e.g. name@upi):");
-            if(u) localStorage.setItem('owner_upi', u);
-        }
-    }
-</script>
+        // Firebase se reviews dikhana
+        db.ref(`${userID}/reviews`).on('value', snap => {
+            const wall = document.getElementById('reviewWall');
+            wall.innerHTML = '';
+            const data = snap.val(); if(!data) return;
+            Object.values(data).reverse().forEach(r => {
+                wall.innerHTML += `<div class="card" style="border-left:5px solid #f59e0b; margin-top:10px;"><b>${r.athlete}</b> <span style="color:#fbbf24; float:right;">${'★'.repeat(r.rating)}</span><br><p>${r.msg}</p></div>`;
+            });
+        });
+    </script>
 </body>
 </html>
-
