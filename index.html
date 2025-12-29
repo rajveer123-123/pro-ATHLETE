@@ -19,32 +19,26 @@
         .container { padding: 15px; display: none; max-width: 850px; margin: auto; }
         .container.active { display: block; }
 
-        /* Athlete Cards & Scroller */
-        .card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; position: relative; }
-        .event-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 5px; scrollbar-width: none; }
-        .event-box { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        /* Athlete Cards & Flash Cards */
+        .card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
+        .flash-card { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 20px; border-radius: 20px; cursor: pointer; margin-bottom: 10px; transition: 0.3s; position: relative; overflow: hidden; }
+        .flash-card:active { transform: scale(0.98); }
+        .flash-card h3 { margin: 0; font-size: 20px; }
+        .flash-card p { margin: 5px 0 0; font-size: 12px; opacity: 0.9; }
+
+        .detail-view { display: none; padding-top: 10px; }
+
+        .event-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .event-box { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); color: #333; }
         
-        /* Form Elements */
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; background: #f8fafc; box-sizing: border-box; }
         .btn-save { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
         
-        /* Tables & Charts */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-        .data-table th, .data-table td { text-align: left; padding: 8px; border-bottom: 1px solid #f1f5f9; }
-        .pb-tag { background: #fffbeb; border: 1px solid #fbbf24; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; color: #92400e; }
-        .del-btn { color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 10px; }
-        .profile-del { position: absolute; top: 20px; right: 20px; background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 10px; font-size: 10px; cursor: pointer; }
-        
         canvas { max-height: 180px; width: 100% !important; margin: 10px 0; }
         
-        /* AI Chat UI Upgraded */
-        #chat-window { height: 300px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
-        .msg-bot { align-self: flex-start; background: #ede9fe; color: #4c1d95; border-bottom-left-radius: 2px; border-left: 4px solid var(--ai-purple); }
-        
-        /* Review Extras */
-        .live-count-badge { background: var(--ai-purple); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        /* Review Section */
+        .rev-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; border-left: 5px solid var(--ai-purple); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .live-count-badge { background: var(--ai-purple); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -62,8 +56,7 @@
             <h3>🏃 Practice Log Entry</h3>
             <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <optgroup label="Sprints (Time)">
-                    <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
+              <option>30m</option><option>40m</option><option>60m</option><option>80m</option>
                     <option>120m</option><option>150m</option><option>180m</option><option>300m</option>
                 </optgroup>
                 <optgroup label="Jumps (Distance)">
@@ -73,8 +66,9 @@
                 <optgroup label="Throws">
                     <option>Ball Throw</option><option>Back Throw</option>
                 </optgroup>
+                
             </select>
-            <input type="number" step="0.01" id="pScore" placeholder="Result (s or m)">
+            <input type="number" step="0.01" id="pScore" placeholder="Result">
             <input type="date" id="pDate">
             <button class="btn-save" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
         </div>
@@ -109,61 +103,33 @@
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
-            <button class="btn-save" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL TRIAL</button>
+            <button class="btn-save" style="background: var(--main)" onclick="saveData('Main')">SAVE OFFICIAL</button>
         </div>
         <div id="main-display"></div>
     </div>
 
     <div id="d-page" class="container">
-        <h2 style="text-align:center">📈 Progress Dashboard</h2>
+        <h2 style="text-align:center">📈 Progress Analytics</h2>
         <div id="analytics-display"></div>
     </div>
 
     <div id="a-page" class="container">
-        <div class="card" id="lock-screen">
-            <h3>AIA Premium Coach 🔒</h3>
-            <input type="text" id="pin" placeholder="Enter PIN (1234)">
-            <button class="btn-save" style="background: var(--ai-purple)" onclick="unlockAI()">UNLOCK AI</button>
-        </div>
-        <div id="ai-interface" style="display:none;">
-            <div class="card">
-                <h4>🤖 AIA Smart Coach (Contextual Logic)</h4>
-                <div id="chat-window">
-                    <div class="msg msg-bot">Namaste! Main AIA Coach hoon. Aap mujhse Injury Recovery, Stamina, Diet ya Speed drills ke baare mein detail mein pooch sakte hain.</div>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="text" id="chat-in" placeholder="Ask specific questions..."><button class="btn-save" style="width:70px; margin:0; background: var(--ai-purple)" onclick="askAdvancedCoach()">ASK</button>
-                </div>
-            </div>
-            <div class="card">
-                <button class="btn-save" style="background: var(--primary)" onclick="genMonthlyReport()">GENERATE MONTHLY AUDIT</button>
-                <div id="report-output" style="margin-top:10px; display:none; background:#f5f3ff; padding:15px; border-radius:15px; font-size:13px; color:#4c1d95;"></div>
+        <div class="card">
+            <h3>🤖 AI Coach Insights</h3>
+            <div id="ai-suggestion-box" style="background: #f5f3ff; padding: 15px; border-radius: 15px; color: #4c1d95; font-size: 14px;">
+                Enter athlete data to see AI insights here.
             </div>
         </div>
     </div>
 
     <div id="v-page" class="container">
         <div style="text-align:center; margin-bottom:15px;">
-            <span class="live-count-badge">LIVE FEEDBACKS: <span id="revCount">0</span></span>
+            <span class="live-count-badge">GLOBAL WALL: <span id="revCount">0</span> FEEDBACKS</span>
         </div>
         <div class="card">
-            <h3>💬 Global Experience Review</h3>
             <input type="text" id="revName" placeholder="Your Name">
-            <select id="revRole">
-                <option value="Student">Athlete / Student</option>
-                <option value="Coach">Professional Coach</option>
-                <option value="Follower">Academy Supporter</option>
-            </select>
-            <label style="font-size:12px; color:#64748b; font-weight:bold;">Rate Performance (1-5 Stars):</label>
-            <select id="revStars" style="background:#fffbeb; border:1px solid #fbbf24;">
-                <option value="5">⭐⭐⭐⭐⭐ Excellent (Elite)</option>
-                <option value="4">⭐⭐⭐⭐ Very Good</option>
-                <option value="3">⭐⭐⭐ Good</option>
-                <option value="2">⭐⭐ Fair</option>
-                <option value="1">⭐ Needs Work</option>
-            </select>
-            <textarea id="revText" placeholder="How was your training today? Write detail feedback..."></textarea>
-            <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST GLOBAL REVIEW</button>
+            <textarea id="revText" placeholder="Share your experience with everyone..."></textarea>
+            <button class="btn-save" style="background: var(--ai-purple)" onclick="submitReview()">POST GLOBALLY</button>
         </div>
         <div id="reviewWall"></div>
     </div>
@@ -183,13 +149,7 @@
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
-        if(localStorage.getItem('premium_unlocked') === 'true') {
-            document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('ai-interface').style.display = 'block';
-        }
     }
-
-    function unlockAI() { if(document.getElementById('pin').value==='1234'){ localStorage.setItem('premium_unlocked','true'); location.reload(); } }
 
     function saveData(type) {
         const pre = type === 'Practice' ? 'p' : 'm';
@@ -198,13 +158,16 @@
         const s = document.getElementById(pre+'Score').value;
         const d = document.getElementById(pre+'Date').value;
         if(n && s && d) {
-            db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: s, date: d, ts: Date.now() });
+            db.ref(`${ID}/data/${n}/${type}/${e.replace(/\s/g,'-')}`).push({ score: s, date: d });
             document.getElementById(pre+'Score').value = '';
         }
     }
 
-    function deleteRecord(n, c, e, id) { if(confirm("Delete entry?")) db.ref(`${ID}/data/${n}/${c}/${e}/${id}`).remove(); }
-    function deleteAthlete(n) { if(confirm("Delete entire profile?")) db.ref(`${ID}/data/${n}`).remove(); }
+    // Toggle Flash Card
+    function toggleDetail(name) {
+        const detail = document.getElementById('detail-' + name);
+        detail.style.display = detail.style.display === 'block' ? 'none' : 'block';
+    }
 
     db.ref(`${ID}/data`).on('value', snap => {
         const pDisp = document.getElementById('practice-display');
@@ -214,86 +177,72 @@
         const data = snap.val(); if(!data) return;
 
         for(let n in data) {
+            // Create Flash Card for Analytics
+            const flash = document.createElement('div');
+            flash.innerHTML = `
+                <div class="flash-card" onclick="toggleDetail('${n}')">
+                    <h3>👤 ${n}</h3>
+                    <p>Click to view Practice & Official Performance Graphs ↓</p>
+                </div>
+                <div id="detail-${n}" class="detail-view"></div>
+            `;
+            dDisp.appendChild(flash);
+
             for(let cat in data[n]) {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<button class="profile-del" onclick="deleteAthlete('${n}')">DELETE</button>
-                                  <div style="font-size:18px; font-weight:800; margin-bottom:15px;">👤 ${n} (${cat})</div>
-                                  <div class="event-scroller" id="scroll-${n}-${cat}"></div>`;
+                card.innerHTML = `<h4>${cat} Log - ${n}</h4><div class="event-scroller"></div>`;
                 
                 for(let evKey in data[n][cat]) {
                     const logs = Object.entries(data[n][cat][evKey]).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date)-new Date(b.date));
                     const scores = logs.map(l => parseFloat(l.score));
-                    const isTime = evKey.toLowerCase().includes('m') || evKey.toLowerCase().includes('sprint');
-                    const pb = isTime ? Math.min(...scores) : Math.max(...scores);
                     const gid = `chart-${n}-${cat}-${evKey}`.replace(/\s+/g,'-');
-
+                    
                     const box = document.createElement('div');
                     box.className = 'event-box';
-                    box.innerHTML = `<div style="display:flex; justify-content:space-between"><strong>${evKey.replace(/-/g,' ')}</strong> <span class="pb-tag">PB: ${pb}</span></div>
-                                     <canvas id="${gid}"></canvas>
-                                     <table class="data-table"><thead><tr><th>Date</th><th>Score</th><th></th></tr></thead>
-                                     <tbody>${logs.map(l => `<tr><td>${l.date}</td><td><b>${l.score}</b></td><td><button class="del-btn" onclick="deleteRecord('${n}','${cat}','${evKey}','${l.id}')">X</button></td></tr>`).join('')}</tbody></table>`;
+                    box.innerHTML = `<strong>${evKey}</strong><canvas id="${gid}"></canvas>`;
                     card.querySelector('.event-scroller').appendChild(box);
-                    setTimeout(() => renderChart(gid, logs.map(l=>l.date), scores, isTime), 500);
+                    
+                    setTimeout(() => renderChart(gid, logs.map(l=>l.date), scores, cat === 'Practice' ? '#059669' : '#dc2626'), 200);
                 }
-                if(cat==='Practice') pDisp.appendChild(card);
-                else { mDisp.appendChild(card); dDisp.appendChild(card.cloneNode(true)); }
+
+                if(cat==='Practice') pDisp.appendChild(card.cloneNode(true));
+                else mDisp.appendChild(card.cloneNode(true));
+                
+                // Add detail graphs to Flash Card
+                document.getElementById('detail-' + n).appendChild(card.cloneNode(true));
             }
         }
     });
 
-    function renderChart(id, labels, data, rev) {
-        const ctx = document.getElementById(id); if(!ctx) return;
-        if(charts[id]) charts[id].destroy();
-        charts[id] = new Chart(ctx, {
-            type: 'line',
-            data: { labels: labels, datasets: [{ data: data, borderColor: '#1e40af', backgroundColor: 'rgba(30,64,175,0.05)', fill: true, tension: 0.4 }] },
-            options: { plugins: { legend: { display: false } }, scales: { y: { reverse: rev } } }
+    function renderChart(id, labels, data, color) {
+        const canvases = document.querySelectorAll(`canvas[id="${id}"]`);
+        canvases.forEach(canvas => {
+            new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: data, borderColor: color, tension: 0.3, fill: false }] },
+                options: { plugins: { legend: { display: false } } }
+            });
         });
     }
 
-    // SUPER ADVANCED AI COACH LOGIC
-    function askAdvancedCoach() {
-        const i = document.getElementById('chat-in'); const w = document.getElementById('chat-window');
-        const query = i.value.toLowerCase(); if(!query) return;
-        w.innerHTML += `<div class="msg msg-user">${i.value}</div>`;
-        i.value = '';
-
-        setTimeout(() => {
-            let reply = "Aapki consistency track ho rahi hai. Focus maintain rakhein.";
-            if(query.includes("injury") || query.includes("pain") || query.includes("recovery")) {
-                reply = "<b>🚑 Injury Recovery:</b> Agar pain sharp hai toh 'RICE' method follow karein. Mobility exercises karein par loading kam rakhein. Protein intake badhayein recovery tez hogi.";
-            } else if(query.includes("endurance") || query.includes("stamina") || query.includes("long distance")) {
-                reply = "<b>🔋 Stamina Building:</b> Iske liye hafte mein 1 long run (low heart rate) aur interval tempo runs zaroori hain. Aerobic capacity badhane ke liye core stability par focus karein.";
-            } else if(query.includes("diet") || query.includes("protein") || query.includes("nutrition")) {
-                reply = "<b>🍎 Nutrition Tip:</b> Training se pehle complex carbs (Oats/Banana) aur post-training High Protein (Eggs/Paneer) recovery ke liye lein. Hydration levels check karein.";
-            } else if(query.includes("speed") || query.includes("tez") || query.includes("sprint")) {
-                reply = "<b>⚡ Speed Intelligence:</b> 30m aur 60m explosive starts karein. Speed drills mein rest period lamba rakhein (Quality over Quantity). Plyometrics explosive power ke liye best hain.";
-            }
-            w.innerHTML += `<div class="msg msg-bot">${reply}</div>`;
-            w.scrollTop = w.scrollHeight;
-        }, 800);
-    }
-
-    function genMonthlyReport() { const o = document.getElementById('report-output'); o.style.display='block'; o.innerHTML = "<b>Monthly Audit:</b> Trends show 5% improvement in sprint velocity. Jumps are stable. Focus on leg strength next week!"; }
-
-    // GLOBAL REVIEW LOGIC
+    // Global Review System (Everyone sees this)
     function submitReview() {
-        const n = document.getElementById('revName').value.trim();
-        const r = document.getElementById('revRole').value;
-        const s = document.getElementById('revStars').value;
-        const m = document.getElementById('revText').value.trim();
-        if(n && m) {
-            db.ref(`GLOBAL_REVIEWS`).push({ name: n, role: r, stars: parseInt(s), message: m, ts: Date.now() });
+        const n = document.getElementById('revName').value;
+        const t = document.getElementById('revText').value;
+        if(n && t) {
+            db.ref(`GLOBAL_REVIEWS`).push({ name: n, text: t, ts: Date.now() });
             document.getElementById('revText').value = '';
         }
     }
 
     db.ref(`GLOBAL_REVIEWS`).on('value', snap => {
-        const wall = document.getElementById('reviewWall'); document.getElementById('revCount').innerText = snap.numChildren();
-        wall.innerHTML = ''; let revs = []; snap.forEach(c => revs.push(c.val())); revs.reverse().forEach(d => {
-            wall.innerHTML += `<div class="card" style="border-left:5px solid var(--ai-purple)"><b>${d.name}</b> <small>(${d.role})</small> ${'⭐'.repeat(d.stars)}<p style="font-size:12px; margin-top:5px;">${d.message}</p></div>`;
+        const wall = document.getElementById('reviewWall');
+        document.getElementById('revCount').innerText = snap.numChildren();
+        wall.innerHTML = '';
+        snap.forEach(child => {
+            const d = child.val();
+            wall.innerHTML = `<div class="rev-card"><b>${d.name}:</b> <p>${d.text}</p></div>` + wall.innerHTML;
         });
     });
 </script>
