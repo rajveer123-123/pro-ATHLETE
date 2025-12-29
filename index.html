@@ -3,131 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track & Field Coach-Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Elite Performance Pro v32</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --p: #1e40af; --s: #7c3aed; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 70px; }
-        .nav-bar { display: flex; overflow-x: auto; background: white; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 1000; padding: 5px; gap: 10px; scrollbar-width: none; }
-        .nav-bar::-webkit-scrollbar { display: none; }
-        .nav-btn { padding: 12px 20px; border: none; background: none; font-weight: bold; color: #64748b; cursor: pointer; white-space: nowrap; }
-        .nav-btn.active { color: var(--p); border-bottom: 3px solid var(--p); }
+        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --premium: #7c3aed; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; }
+        .nav-btn { min-width: 90px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; }
+        .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
         .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
-        .container.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #e2e8f0; }
-        label { font-weight: 600; font-size: 14px; color: #475569; display: block; margin-top: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 12px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .feedback-card { background: #fff; border-left: 5px solid #10b981; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        .container.active { display: block; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .paywall { display: none; text-align: center; padding: 40px 20px; background: #fff; border: 2px solid var(--premium); border-radius: 25px; }
+        .pay-link { display:block; background:#22c55e; color:white; padding:15px; border-radius:12px; text-decoration:none; font-weight:bold; margin-top:15px; }
+        .athlete-card { background: white; border-radius: 25px; margin-bottom: 30px; padding: 20px; border-left: 10px solid var(--primary); }
+        .scroll-x { display: flex; overflow-x: auto; gap: 20px; padding: 10px 0; }
+        .graph-card { min-width: 310px; background: #fff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 15px; }
+        .ai-box { background:#f0f7ff; padding:12px; border-radius:12px; font-size:13px; margin-top:10px; border-left: 4px solid var(--primary); line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <button class="nav-btn active" onclick="showTab('p-tab', this)">🏃 Practice</button>
-        <button class="nav-btn" onclick="showTab('m-tab', this)">🏆 Main Event</button>
-        <button class="nav-btn" onclick="showTab('r-tab', this)">📊 AI Report</button>
-        <button class="nav-btn" onclick="showTab('v-tab', this)">💬 Reviews</button>
+    <div class="nav">
+        <div class="nav-btn active" onclick="showTab('page-practice', this)">PRACTICE</div>
+        <div class="nav-btn" onclick="showTab('page-main', this)">MAIN</div>
+        <div class="nav-btn" onclick="showTab('page-dash', this)">DASHBOARD</div>
+        <div class="nav-btn" onclick="showTab('page-reports', this)">AI REPORTS</div>
     </div>
 
-    <div id="p-tab" class="container active">
-        <h2>Practice Session</h2>
+    <div id="page-practice" class="container active">
+        <h2 style="color: var(--practice)">🏃 Training Session</h2>
         <div class="card">
-            <label>Athlete Name:</label>
-            <input type="text" id="pAthName" placeholder="Enter Name">
-            
-            <label>Date:</label>
-            <input type="date" id="pDate">
-
-            <label>Select Drill:</label>
+            <input type="text" id="pName" placeholder="Athlete Name">
             <select id="pDrill">
-                <option>30 Metre</option><option>40 Metre</option><option>80 Metre</option>
-                <option>120 Metre</option><option>150 Metre</option><option>180 Metre</option>
-                <option>300 Metre</option><option>800 Metre</option>
-                <option>Broad Jump</option><option>Standing Triple</option>
-                <option>5 Bounded</option><option>10 Bounded</option>
-                <option>Ball Throw</option><option>Back Throw</option>
+                <option>30m Sprint</option><option>80m Sprint</option><option>150m Sprint</option><option>300m Sprint</option>
+                <option>Broad Jump</option><option>5 Bonded Jumps</option><option>10 Bonded Jumps</option>
+                <option>Medicine Ball Throw</option><option>Back Throw</option>
             </select>
-            
-            <label>Result:</label>
-            <input type="number" step="0.01" id="pRes" placeholder="0.00">
-            <button class="btn" style="background:var(--p)" onclick="saveData('practice')">SAVE PRACTICE</button>
+            <input type="number" step="0.01" id="pScore" placeholder="Result (Sec/Meter)">
+            <input type="date" id="pDate">
+            <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
         </div>
     </div>
 
-    <div id="m-tab" class="container">
-        <h2>Main Event</h2>
+    <div id="page-main" class="container">
+        <h2 style="color: var(--main)">🏆 Official Trials</h2>
         <div class="card">
-            <label>Athlete Name:</label>
-            <input type="text" id="mAthName" placeholder="Athlete Name">
-            <label>Date:</label>
-            <input type="date" id="mDate">
-            <label>Select Event:</label>
+            <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
-                <option>100m</option><option>200m</option><option>400m</option><option>800m</option>
-                <option>Long Jump</option><option>Shot Put</option>
+                <option>100m Dash</option><option>200m Dash</option><option>400m Dash</option>
+                <option>Long Jump</option><option>Triple Jump</option><option>Shot Put</option><option>Discus Throw</option>
             </select>
-            <input type="number" step="0.01" id="mRes" placeholder="Result">
-            <button class="btn" style="background:var(--s)" onclick="saveData('main')">SAVE EVENT</button>
+            <input type="number" step="0.01" id="mScore" placeholder="Result">
+            <input type="date" id="mDate">
+            <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE EVENT</button>
         </div>
     </div>
 
-    <div id="v-tab" class="container">
-        <h2>User Reviews</h2>
-        <div class="card">
-            <input type="text" id="revName" placeholder="Your Name">
-            <textarea id="revMsg" placeholder="Your review..."></textarea>
-            <button class="btn" style="background:#10b981" onclick="submitReview()">SUBMIT REVIEW</button>
+    <div id="page-reports" class="container">
+        <h2 id="report-title" onclick="adminCheck()" style="color: var(--premium)">📜 AI Monthly Reports</h2>
+        <div id="reports-list"></div>
+        <div id="paywall-screen" class="paywall">
+            <h3>Premium Locked 🔒</h3>
+            <p>Your trial expired. Pay & enter Transaction ID to unlock instantly.</p>
+            <div id="payment-box"></div>
+            <input type="text" id="userUtr" placeholder="Enter Transaction ID (UTR)">
+            <button class="btn" style="background:var(--premium)" onclick="submitPayment()">UNLOCK NOW</button>
         </div>
-        <div id="reviewWall"></div>
     </div>
 
-    <script>
-        // Replace with your Firebase config
-        const firebaseConfig = { apiKey: "AIza...", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div id="page-dash" class="container">
+        <h2>📊 Performance Dashboard</h2>
+        <div id="displayArea"></div>
+    </div>
 
-        function showTab(id, btn) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+<script>
+    // Config & Setup
+    const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    let userID = localStorage.getItem('athleteTracker_ID') || 'user_v32_final';
+    let installDate = localStorage.getItem('install_date') || Date.now();
+    localStorage.setItem('athleteTracker_ID', userID);
+    localStorage.setItem('install_date', installDate);
+
+    function showTab(id, btn) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        if(id === 'page-reports') checkSubscription();
+    }
+
+    // AI Advice Generator
+    function getSmartAdvice(event) {
+        if(event.includes('Sprint') || event.includes('100m')) return "SPEED: Work on 'Wicket Runs' for stride frequency and high knees.";
+        if(event.includes('Jump')) return "POWER: Focus on explosive take-offs. Add 'Box Jumps' and 'Depth Jumps'.";
+        if(event.includes('Throw') || event.includes('Put')) return "STRENGTH: Focus on hip rotation and 'Med Ball Slams' for explosive release.";
+        return "Maintain consistent practice and focus on recovery.";
+    }
+
+    // Payment Logic
+    function submitPayment() {
+        const utr = document.getElementById('userUtr').value;
+        if(utr.length < 6) return alert("Enter valid Transaction ID");
+        localStorage.setItem('premium_unlocked', 'true');
+        db.ref(`${userID}/payments`).push({ utr, date: new Date().toLocaleString() });
+        alert("Payment Submitted! Reports Unlocked.");
+        location.reload();
+    }
+
+    function checkSubscription() {
+        const isUnlocked = localStorage.getItem('premium_unlocked');
+        const daysUsed = Math.floor((Date.now() - parseInt(installDate)) / (1000*60*60*24));
+        if (isUnlocked === 'true' || daysUsed < 30) {
+            document.getElementById('reports-list').style.display = 'block';
+            document.getElementById('paywall-screen').style.display = 'none';
+        } else {
+            document.getElementById('reports-list').style.display = 'none';
+            document.getElementById('paywall-screen').style.display = 'block';
+            const upi = localStorage.getItem('owner_upi') || 'coach@upi';
+            document.getElementById('payment-box').innerHTML = `<a href="upi://pay?pa=${upi}&am=499&cu=INR" class="pay-link">PAY VIA UPI</a>`;
         }
+    }
 
-        function saveData(type) {
-            const prefix = type === 'practice' ? 'p' : 'm';
-            const athlete = document.getElementById(prefix + 'AthName').value;
-            const date = document.getElementById(prefix + 'Date').value;
-            const val = document.getElementById(prefix + 'Res').value;
-            const event = document.getElementById(type === 'practice' ? 'pDrill' : 'mEvent').value;
+    // Save Data
+    function saveData(type) {
+        const pre = type === 'Practice' ? 'p' : 'm';
+        const name = document.getElementById(pre+'Name').value.trim();
+        const event = document.getElementById(pre+(type==='Practice'?'Drill':'Event')).value;
+        const date = document.getElementById(pre+'Date').value;
+        const score = parseFloat(document.getElementById(pre+'Score').value);
+        if(!name || !date || isNaN(score)) return alert("Fill all fields");
+        db.ref(`${userID}/data/${name}/${event.replace(/\s/g,'')}`).push({ type, event, date, score, ts: Date.now() });
+        document.getElementById(pre+'Score').value = '';
+    }
 
-            if(athlete && date && val) {
-                db.ref(`academy/${type}`).push({ athlete, date, event, val });
-                alert("Saved!");
-            } else { alert("Please fill Name, Date and Result!"); }
-        }
+    // Display & Analysis
+    db.ref(`${userID}/data`).on('value', snap => {
+        const area = document.getElementById('displayArea');
+        const rList = document.getElementById('reports-list');
+        area.innerHTML = ''; rList.innerHTML = '';
+        const data = snap.val(); if(!data) return;
 
-        function submitReview() {
-            const name = document.getElementById('revName').value;
-            const msg = document.getElementById('revMsg').value;
-            if(name && msg) {
-                db.ref(`public_reviews`).push({ name, msg, time: new Date().toLocaleString() });
-                alert("Review submitted!");
+        for(let name in data) {
+            const card = document.createElement('div'); card.className = 'athlete-card';
+            card.innerHTML = `<strong>👤 ${name}</strong><div class="scroll-x" id="sc-${name.replace(/\s/g,'')}"></div>`;
+            area.appendChild(card);
+            let rHTML = `<div class="report-card"><h3>${name} Analysis</h3>`;
+
+            for(let eKey in data[name]) {
+                const logs = Object.values(data[name][eKey]).sort((a,b)=>a.ts - b.ts);
+                const latest = logs[logs.length-1];
+                rHTML += `<p><b>${latest.event}:</b> Last Score ${latest.score}</p>
+                          <div class="ai-box"><b>AI Coach:</b> ${getSmartAdvice(latest.event)}</div>`;
+                
+                const gCard = document.createElement('div'); gCard.className = 'graph-card';
+                gCard.innerHTML = `<small>${latest.event}</small><canvas id="c-${name.replace(/\s/g,'')}-${eKey}"></canvas>`;
+                document.getElementById(`sc-${name.replace(/\s/g,'')}`).appendChild(gCard);
+                
+                setTimeout(() => {
+                    new Chart(document.getElementById(`c-${name.replace(/\s/g,'')}-${eKey}`), {
+                        type: 'line',
+                        data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.3 }] },
+                        options: { scales:{x:{display:false}}, plugins:{legend:{display:false}} }
+                    });
+                }, 100);
             }
+            rHTML += `</div>`;
+            rList.innerHTML += rHTML;
         }
+    });
 
-        db.ref(`public_reviews`).on('value', snap => {
-            const wall = document.getElementById('reviewWall');
-            wall.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val();
-                wall.innerHTML += `<div class="feedback-card"><b>${d.name}</b><p>${d.msg}</p></div>`;
-            });
-        });
-    </script>
+    // Admin Password Setting
+    function adminCheck() {
+        let p = prompt("Password:");
+        if(p === "1234") {
+            let u = prompt("Enter your UPI ID (e.g. name@upi):");
+            if(u) localStorage.setItem('owner_upi', u);
+        }
+    }
+</script>
 </body>
 </html>
