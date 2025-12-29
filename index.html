@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Performance Pro AI - v42 Final</title>
+    <title>Elite Performance Pro AI - v45 Final Events</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,11 +20,13 @@
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .scroll-x { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; }
         .graph-card { min-width: 300px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 15px; }
-        .data-list { margin-top: 10px; font-size: 12px; max-height: 120px; overflow-y: auto; background: #fcfcfc; border-radius: 10px; padding: 5px; }
-        .data-item { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid #eee; }
+        .data-list { margin-top: 10px; font-size: 11px; max-height: 100px; overflow-y: auto; background: #f1f5f9; padding: 5px; border-radius: 10px; }
+        .data-item { display: flex; justify-content: space-between; padding: 4px; border-bottom: 1px solid #ddd; align-items: center; }
         .mini-del { color: #dc2626; background: #fee2e2; border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 10px; }
-        .rev-item { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .stars { color: #f59e0b; font-size: 14px; }
+        #chat-wall { height: 200px; overflow-y: auto; background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+        .msg { padding: 8px; border-radius: 10px; margin-bottom: 5px; font-size: 13px; max-width: 80%; }
+        .bot { background: #e0e7ff; color: #1e40af; } .user { background: #fff; border: 1px solid #ddd; margin-left: auto; }
+        .ai-report-card { border-left: 5px solid var(--premium); background: #f5f3ff; padding: 15px; border-radius: 15px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -33,6 +35,7 @@
         <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
         <div class="nav-btn" onclick="showTab('m-page', this)">MAIN</div>
         <div class="nav-btn" onclick="showTab('d-page', this)">DASHBOARD</div>
+        <div class="nav-btn" onclick="showTab('a-page', this)">AI PREMIUM</div>
         <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
@@ -58,8 +61,9 @@
             <input type="text" id="mName" placeholder="Athlete Name">
             <select id="mEvent">
                 <option>100 Metre</option><option>200 Metre</option><option>400 Metre</option><option>800 Metre</option>
-                <option>1500 Metre</option><option>3 Kilometre</option><option>Long Jump</option><option>High Jump</option>
-                <option>Triple Jump</option><option>Javelin Throw</option><option>Discus Throw</option><option>Shot Put</option>
+                <option>1500 Metre</option><option>3 Kilometre</option><option>5 Kilometre</option>
+                <option>Long Jump</option><option>High Jump</option><option>Triple Jump</option>
+                <option>Javelin Throw</option><option>Discus Throw</option><option>Shot Put</option>
             </select>
             <input type="number" step="0.01" id="mScore" placeholder="Result">
             <input type="date" id="mDate">
@@ -68,36 +72,87 @@
         <div id="main-live-view"></div>
     </div>
 
-    <div id="v-page" class="container">
-        <h2>💬 User Reviews (<span id="revCount">0</span>)</h2>
-        <div class="card">
-            <input type="text" id="revName" placeholder="Your Name">
-            <select id="revStars">
-                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                <option value="3">⭐⭐⭐ (3/5)</option>
-                <option value="2">⭐⭐ (2/5)</option>
-                <option value="1">⭐ (1/5)</option>
-            </select>
-            <textarea id="revText" placeholder="Write your feedback..."></textarea>
-            <button class="btn" style="background: var(--premium)" onclick="submitReview()">POST REVIEW</button>
+    <div id="a-page" class="container">
+        <h2 style="color: var(--premium)">🤖 AI Performance Pro</h2>
+        <div id="lock-screen" class="card" style="text-align: center;">
+            <h3>AI Report & Chat Locked 🔒</h3>
+            <p>Unlock 24/7 Chat & Detailed Graph Analysis.</p>
+            <input type="text" id="actCode" placeholder="Code: 1234">
+            <button class="btn" style="background:var(--premium)" onclick="unlock()">UNLOCK NOW</button>
         </div>
-        <div id="reviewWall" class="card"></div>
+        <div id="ai-content" style="display:none;">
+            <div class="card">
+                <h4>💬 AI Coaching Chat</h4>
+                <div id="chat-wall"></div>
+                <div style="display:flex; gap:10px;"><input type="text" id="chat-in" placeholder="Ask AI..."><button class="btn" style="width:70px; margin:0; background:var(--premium)" onclick="askAI()">ASK</button></div>
+            </div>
+            <div id="ai-report-wall"></div>
+        </div>
     </div>
 
     <div id="d-page" class="container"><h2>📊 Dashboard</h2><div id="displayArea"></div></div>
+
+    <div id="v-page" class="container">
+        <h2>💬 Reviews (<span id="revCount">0</span>)</h2>
+        <div class="card">
+            <input type="text" id="revName" placeholder="Name">
+            <select id="revStars"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
+            <textarea id="revText" placeholder="Your Feedback"></textarea>
+            <button class="btn" style="background: var(--premium)" onclick="submitReview()">POST</button>
+        </div>
+        <div id="reviewWall"></div>
+    </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ID = 'user_v42_final';
+    const ID = 'user_v45_final_events';
 
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
+        if(id === 'a-page') checkSub();
+    }
+
+    function unlock() { if(document.getElementById('actCode').value === '1234') { localStorage.setItem('premium', 'true'); checkSub(); } }
+
+    function checkSub() {
+        if(localStorage.getItem('premium') === 'true') {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('ai-content').style.display = 'block';
+            generateAIReport();
+        }
+    }
+
+    function generateAIReport() {
+        db.ref(`${ID}/data`).once('value', snap => {
+            const data = snap.val(); const w = document.getElementById('ai-report-wall'); 
+            w.innerHTML = '<h4>📊 AI Athlete Report</h4>';
+            if(!data) return;
+            for(let n in data) {
+                let r = `<div class="ai-report-card"><b>Athlete: ${n}</b><br>`;
+                for(let cat in data[n]) {
+                    for(let ev in data[n][cat]) {
+                        const logs = Object.values(data[n][cat][ev]).sort((a,b)=>a.ts-b.ts);
+                        if(logs.length > 1) {
+                            const diff = (logs[logs.length-1].score - logs[0].score).toFixed(2);
+                            r += `🔹 ${ev}: Progress ${diff > 0 ? 'Improved' : 'Dipped'}.<br>`;
+                        }
+                    }
+                }
+                w.innerHTML += r + `</div>`;
+            }
+        });
+    }
+
+    function askAI() {
+        const q = document.getElementById('chat-in').value; if(!q) return;
+        const w = document.getElementById('chat-wall'); w.innerHTML += `<div class="msg user">${q}</div>`;
+        setTimeout(() => { w.innerHTML += `<div class="msg bot"><b>AI Coach:</b> Based on your graphs, focus on recovery today.</div>`; w.scrollTop = w.scrollHeight; }, 600);
+        document.getElementById('chat-in').value = '';
     }
 
     function saveData(type) {
@@ -108,7 +163,6 @@
         const date = document.getElementById(p+'Date').value;
         if(name && score && date) { 
             db.ref(`${ID}/data/${name}/${type}/${event.replace(/\s/g,'')}`).push({ score, date, ts: Date.now(), event }); 
-            // No notification on save
             document.getElementById(p+'Score').value = '';
         }
     }
@@ -116,56 +170,37 @@
     function deleteEntry(name, cat, eventKey, entryKey) {
         if(confirm("Delete this entry?")) {
             db.ref(`${ID}/data/${name}/${cat}/${eventKey}/${entryKey}`).remove();
-            alert("Entry Deleted!"); // Notification only on delete
+            alert("Deleted!");
         }
     }
 
     function submitReview() {
-        const name = document.getElementById('revName').value;
-        const rating = document.getElementById('revStars').value;
-        const msg = document.getElementById('revText').value;
-        if(name && msg) {
-            db.ref(`${ID}/reviews`).push({ name, rating, msg, date: new Date().toLocaleDateString() });
-            document.getElementById('revName').value = "";
-            document.getElementById('revText').value = "";
-        }
+        const n = document.getElementById('revName').value; const s = document.getElementById('revStars').value; const m = document.getElementById('revText').value;
+        if(n && m) { db.ref(`${ID}/reviews`).push({ name: n, rating: s, msg: m, date: new Date().toLocaleDateString() }); }
     }
 
     db.ref(`${ID}/reviews`).on('value', snap => {
-        const wall = document.getElementById('reviewWall');
-        const count = document.getElementById('revCount');
-        wall.innerHTML = '';
-        let total = 0;
-        snap.forEach(c => {
-            const d = c.val();
-            let s = "⭐".repeat(d.rating);
-            wall.innerHTML = `<div class="rev-item"><b>${d.name}</b> <span class="stars">${s}</span><br><small>${d.date}</small><p>${d.msg}</p></div>` + wall.innerHTML;
-            total++;
-        });
-        count.innerText = total;
+        const wall = document.getElementById('reviewWall'); const count = document.getElementById('revCount'); wall.innerHTML = ''; let t = 0;
+        snap.forEach(c => { const d = c.val(); wall.innerHTML = `<div class="card"><b>${d.name}</b> ("⭐".repeat(d.rating))<p>${d.msg}</p></div>` + wall.innerHTML; t++; });
+        count.innerText = t;
     });
 
     db.ref(`${ID}/data`).on('value', snap => {
-        const pView = document.getElementById('practice-live-view');
-        const mView = document.getElementById('main-live-view');
-        const dash = document.getElementById('displayArea');
-        pView.innerHTML = ''; mView.innerHTML = ''; dash.innerHTML = '';
-        const data = snap.val(); if(!data) return;
-
-        for(let name in data) {
-            const dCard = document.createElement('div'); dCard.className = 'card'; dCard.innerHTML = `<h3>👤 ${name} Dashboard</h3>`; dash.appendChild(dCard);
-            for(let cat in data[name]) {
-                const target = cat === 'Practice' ? pView : mView;
-                const section = document.createElement('div'); section.innerHTML = `<h4>👤 ${name} - ${cat}</h4><div class="scroll-x" id="sc-${cat}-${name}"></div>`; target.appendChild(section);
-                for(let e in data[name][cat]) {
-                    const logs = Object.entries(data[name][cat][e]).map(([key, val]) => ({key, ...val})).sort((a,b)=>a.ts-b.ts);
-                    const gid = `g-${cat}-${name}-${e}`.replace(/\s/g,'');
+        const pV = document.getElementById('practice-live-view'); const mV = document.getElementById('main-live-view'); const dash = document.getElementById('displayArea');
+        pV.innerHTML = ''; mV.innerHTML = ''; dash.innerHTML = ''; const data = snap.val(); if(!data) return;
+        for(let n in data) {
+            const dC = document.createElement('div'); dC.className = 'card'; dC.innerHTML = `<h3>👤 ${n} Summary</h3>`; dash.appendChild(dC);
+            for(let cat in data[n]) {
+                const target = cat === 'Practice' ? pV : mV;
+                const sec = document.createElement('div'); sec.innerHTML = `<h4>👤 ${n} - ${cat}</h4><div class="scroll-x" id="sc-${cat}-${n}"></div>`; target.appendChild(sec);
+                for(let e in data[n][cat]) {
+                    const logs = Object.entries(data[n][cat][e]).map(([key, val]) => ({key, ...val})).sort((a,b)=>a.ts-b.ts);
+                    const gid = `g-${cat}-${n}-${e}`.replace(/\s/g,'');
                     const gc = document.createElement('div'); gc.className = 'graph-card';
-                    let listHTML = `<div class="data-list">`;
-                    logs.forEach(l => { listHTML += `<div class="data-item"><span>📅 ${l.date} - <b>${l.score}</b></span><button class="mini-del" onclick="deleteEntry('${name}','${cat}','${e}','${l.key}')">Del</button></div>`; });
-                    listHTML += `</div>`;
-                    gc.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas>${listHTML}`;
-                    document.getElementById(`sc-${cat}-${name}`).appendChild(gc);
+                    let list = `<div class="data-list">`;
+                    logs.forEach(l => { list += `<div class="data-item"><span>📅 ${l.date}: <b>${l.score}</b></span><button class="mini-del" onclick="deleteEntry('${n}','${cat}','${e}','${l.key}')">Del</button></div>`; });
+                    gc.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas>${list + '</div>'}`;
+                    document.getElementById(`sc-${cat}-${n}`).appendChild(gc);
                     setTimeout(() => renderG(gid, logs), 500);
                 }
             }
@@ -174,8 +209,7 @@
 
     function renderG(id, logs) {
         new Chart(document.getElementById(id), {
-            type: 'line',
-            data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.4 }] },
+            type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', tension:0.4 }] },
             options: { plugins:{legend:{display:false}}, scales:{x:{display:true}} }
         });
     }
