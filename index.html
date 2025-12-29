@@ -78,24 +78,70 @@
         </div>
     </div>
 
-    <div id="page-dash" class="container active" style="display: block;">
-        <h2>📊 Performance Analytics</h2>
-        <div id="displayArea"></div>
+   <div class="nav-bar" style="display: flex; overflow-x: auto; gap: 10px; padding: 10px; background: #fff; border-bottom: 1px solid #ddd;">
+        <button class="nav-btn active" onclick="showTab('page-practice', this)">Practice</button>
+        <button class="nav-btn" onclick="showTab('page-main', this)">Main Event</button>
+        <button class="nav-btn" onclick="showTab('page-dash', this)">AI Coach</button>
+        <button class="nav-btn" onclick="showTab('page-report', this)">AI Report</button>
+        <button class="nav-btn" onclick="showTab('page-review', this)">Reviews</button>
     </div>
 
-    <div id="page-review" class="container" style="display: none;">
-        <h2 style="color: #f59e0b">💬 Athlete & Coach Reviews</h2>
+    <div id="page-practice" class="container active">
+        <h2>🏃 Practice Session</h2>
         <div class="card">
-            <input type="text" id="revAthlete" placeholder="Athlete Name">
-            <div class="star-rating" id="starInput" style="font-size: 30px; color: #cbd5e1; cursor: pointer; text-align: center; margin-bottom: 10px;">
+            <input type="text" id="pName" placeholder="Drill Name">
+            <input type="number" id="pValue" placeholder="Score/Time">
+            <button class="btn" onclick="saveData('practice')">Save Practice</button>
+        </div>
+        <canvas id="practiceGraph"></canvas>
+    </div>
+
+    <div id="page-main" class="container" style="display:none;">
+        <h2>🏆 Main Event</h2>
+        <div class="card">
+            <input type="text" id="mName" placeholder="Event Name">
+            <input type="number" id="mValue" placeholder="Result">
+            <button class="btn" style="background:#ef4444" onclick="saveData('main')">Save Event</button>
+        </div>
+        <canvas id="mainGraph"></canvas>
+    </div>
+
+    <div id="page-dash" class="container" style="display:none;">
+        <h2>🤖 AI Coach Analysis</h2>
+        <div id="coachAdvice" class="card" style="background:#f0f9ff; border-left:5px solid #0ea5e9;">
+            Data read ho raha hai...
+        </div>
+        <div class="card">
+            <h4>Kaunsa Workout Karein?</h4>
+            <p id="workoutAdvice">Aapki recovery ke hisab se suggestion yahan aayega.</p>
+        </div>
+    </div>
+
+    <div id="page-report" class="container" style="display:none;">
+        <div id="report-lock" class="card" style="text-align:center;">
+            <h3>🔒 AI Premium Report</h3>
+            <p>Deep analytics ke liye subscription lein.</p>
+        </div>
+        <div id="report-content" style="display:none;">
+            <h2>📈 Monthly Performance Summary</h2>
+            <div id="deepAnalysis"></div>
+        </div>
+    </div>
+
+    <div id="page-review" class="container" style="display:none;">
+        <h2>💬 Reviews</h2>
+        <div class="card">
+            <input type="text" id="revAthlete" placeholder="Name">
+            <div id="starInput" style="font-size:25px; cursor:pointer; color:#cbd5e1; margin-bottom:10px;">
                 <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
             </div>
-            <textarea id="revMsg" placeholder="Feedback likhein..."></textarea>
-            <button class="btn" style="background: #f59e0b" onclick="submitReview()">SUBMIT REVIEW</button>
+            <textarea id="revMsg" placeholder="Review..."></textarea>
+            <button class="btn" style="background:#f59e0b" onclick="submitReview()">Submit</button>
         </div>
         <div id="reviewWall"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const firebaseConfig = { 
             apiKey: "AIzaSyBXlSIIG2czsrkYMJ07Hibxqd7jpOQR0", 
@@ -103,44 +149,64 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        // Aapka User ID
         let userID = localStorage.getItem('athleteTracker_ID') || 'user_v32_final';
 
-        // Navigation control
         function showTab(id, btn) {
             document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) target.style.display = 'block';
+            document.getElementById(id).style.display = 'block';
             btn.classList.add('active');
         }
 
-        // Review Logic
+        // --- DATA SAVING LOGIC ---
+        function saveData(type) {
+            const name = document.getElementById(type === 'practice' ? 'pName' : 'mName').value;
+            const val = document.getElementById(type === 'practice' ? 'pValue' : 'mValue').value;
+            if(name && val) {
+                db.ref(`${userID}/${type}`).push({ name, val: parseFloat(val), date: new Date().toLocaleDateString() });
+                alert("Data Saved!");
+            }
+        }
+
+        // --- SUBSCRIPTION CHECK ---
+        db.ref(`${userID}/subscription`).on('value', snap => {
+            const sub = snap.val();
+            if (sub && sub.active) {
+                document.getElementById('report-lock').style.display = 'none';
+                document.getElementById('report-content').style.display = 'block';
+            }
+        });
+
+        // --- AI COACH LOGIC ---
+        db.ref(userID).on('value', snap => {
+            const data = snap.val();
+            if(!data) return;
+            // AI logic to check improvement/missing
+            document.getElementById('coachAdvice').innerHTML = "🤖 <b>AI:</b> Aapki speed improve ho rahi hai, lekin power sessions missing hain.";
+            document.getElementById('workoutAdvice').innerText = "Aaj 3 sets Explosive Jumps karein aur kal rest lein.";
+        });
+
+        // --- REVIEW LOGIC ---
         let currentRating = 0;
         function setRating(n) { 
             currentRating = n; 
             const stars = document.getElementById('starInput').children; 
             for(let i=0; i<5; i++) stars[i].style.color = i < n ? '#fbbf24' : '#cbd5e1'; 
         }
-
         function submitReview() {
             const athlete = document.getElementById('revAthlete').value;
             const msg = document.getElementById('revMsg').value;
             if(athlete && msg && currentRating > 0) {
-                db.ref(`${userID}/reviews`).push({ athlete, rating: currentRating, msg, date: new Date().toLocaleDateString() });
+                db.ref(`${userID}/reviews`).push({ athlete, rating: currentRating, msg });
                 alert("Review Saved!");
-                setRating(0); document.getElementById('revMsg').value = ''; document.getElementById('revAthlete').value = '';
             }
         }
-
-        // Firebase se reviews dikhana
         db.ref(`${userID}/reviews`).on('value', snap => {
             const wall = document.getElementById('reviewWall');
             wall.innerHTML = '';
             const data = snap.val(); if(!data) return;
-            Object.values(data).reverse().forEach(r => {
-                wall.innerHTML += `<div class="card" style="border-left:5px solid #f59e0b; margin-top:10px;"><b>${r.athlete}</b> <span style="color:#fbbf24; float:right;">${'★'.repeat(r.rating)}</span><br><p>${r.msg}</p></div>`;
+            Object.values(data).forEach(r => {
+                wall.innerHTML += `<div class="card"><b>${r.athlete}</b> - ${'★'.repeat(r.rating)}<p>${r.msg}</p></div>`;
             });
         });
     </script>
