@@ -3,113 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Athlete Academy Pro AI - v61 Final Master</title>
+    <title>Athlete Academy Pro - v69 Final</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --bg: #f8fafc; --premium: #7c3aed; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; }
-        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
-        .nav-btn { min-width: 100px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; border: none; background: none; }
-        .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f0f7ff; }
-        .container { padding: 15px; display: none; max-width: 600px; margin: auto; }
+        :root { --primary: #2563eb; --practice: #059669; --main: #dc2626; --premium: #7c3aed; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-top: 65px; overflow-x: hidden; }
+        .nav { position: fixed; top: 0; width: 100%; background: #fff; display: flex; border-bottom: 2px solid #e2e8f0; z-index: 1000; height: 60px; overflow-x: auto; scrollbar-width: none; }
+        .nav-btn { min-width: 100px; flex: 1; padding: 20px 5px; text-align: center; font-size: 11px; font-weight: 800; color: #64748b; cursor: pointer; border: none; background: none; transition: 0.3s; }
+        .nav-btn.active { color: var(--primary); border-bottom: 4px solid var(--primary); background: #eff6ff; }
+        .container { padding: 15px; display: none; max-width: 800px; margin: auto; }
         .container.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .ai-coach-box { background: #f0fdf4; border-left: 5px solid #22c55e; padding: 12px; margin-top: 10px; border-radius: 8px; font-size: 13px; color: #166534; line-height: 1.4; }
+        .card { background: white; padding: 18px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        
+        /* HORIZONTAL GRAPHS */
+        .graph-slider { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .graph-card { min-width: 85%; scroll-snap-align: center; background: white; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; }
+        
+        .ai-coach-tip { background: #f0fdf4; border-left: 5px solid #22c55e; padding: 12px; border-radius: 12px; margin-top: 10px; font-size: 13px; color: #166534; }
         .profile-pic { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); display: block; margin: 0 auto 10px; }
-        .data-list { margin-top: 10px; font-size: 11px; background: #f1f5f9; padding: 8px; border-radius: 10px; }
-        .data-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #ddd; }
-        .del-btn { color: #dc2626; background: none; border: 1px solid #dc2626; border-radius: 4px; padding: 2px 5px; cursor: pointer; font-size: 9px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 15px; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
+        .del-btn { color: red; background: none; border: 1px solid red; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="nav">
-        <div class="nav-btn active" onclick="showTab('p-page', this)">PRACTICE</div>
-        <div class="nav-btn" onclick="showTab('m-page', this)">MAIN</div>
-        <div class="nav-btn" onclick="showTab('d-page', this)">DASHBOARD</div>
-        <div class="nav-btn" onclick="showTab('a-page', this)">AI PREMIUM</div>
-        <div class="nav-btn" onclick="showTab('v-page', this)">REVIEWS</div>
+    <div class="nav" id="mainNav" style="display:none;">
+        <div class="nav-btn active" id="btn-p" onclick="showTab('p-page', this)">PRACTICE</div>
+        <div class="nav-btn" id="btn-m" onclick="showTab('m-page', this)">MAIN</div>
+        <div class="nav-btn" id="btn-d" onclick="showTab('d-page', this)">DASHBOARD</div>
+        <div class="nav-btn" id="btn-a" onclick="showTab('a-page', this)">AIA PREMIUM</div>
+        <div class="nav-btn" id="btn-v" onclick="showTab('v-page', this)">REVIEWS</div>
     </div>
 
     <div id="login-screen" style="padding: 20px; text-align: center; margin-top: 40px;">
         <div class="card">
-            <h2>🏆 Athlete Academy</h2>
-            <input type="text" id="userAccessName" placeholder="Full Name">
-            <input type="text" id="userPhotoUrl" placeholder="Profile Photo URL (Link)">
-            <button class="btn" style="background: var(--primary)" onclick="setAthlete()">LOGIN</button>
+            <h2>🏆 Academy Portal</h2>
+            <select id="userRole" onchange="toggleRoleFields()">
+                <option value="athlete">Athlete Login</option>
+                <option value="coach">Coach Login</option>
+            </select>
+            <input type="text" id="userAccessName" placeholder="Enter Name">
+            <div id="athleteFields">
+                <input type="text" id="userPhotoUrl" placeholder="Photo Link (Drive/Web)">
+            </div>
+            <div id="coachFields" style="display:none;">
+                <input type="password" id="coachPassword" placeholder="Coach Password (1234)">
+            </div>
+            <button class="btn" style="background: var(--primary)" onclick="handleLogin()">LOGIN</button>
         </div>
     </div>
 
     <div id="app-content" style="display: none;">
+        
         <div id="p-page" class="container active">
             <h2>🏃 Practice Drills</h2>
-            <div class="card">
+            <div id="athlete-input-p" class="card">
                 <select id="pDrill">
                     <option>30 Metre</option><option>40 Metre</option><option>80 Metre</option><option>120 Metre</option>
                     <option>150 Metre</option><option>180 Metre</option><option>300 Metre</option><option>800 Metre</option>
                     <option>Broad Jump</option><option>Standing Triple</option><option>5 Bounded</option><option>10 Bounded</option>
                 </select>
-                <input type="number" step="0.01" id="pScore" placeholder="Result"><input type="date" id="pDate">
-                <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE DATA</button>
+                <input type="number" step="0.01" id="pScore" placeholder="Score"><input type="date" id="pDate">
+                <button class="btn" style="background: var(--practice)" onclick="saveData('Practice')">SAVE PRACTICE</button>
             </div>
-            <div id="practice-live-view"></div>
+            <div id="practice-graphs" class="graph-slider"></div>
         </div>
 
         <div id="m-page" class="container">
-            <h2>🏆 Main Trials</h2>
-            <div class="card">
+            <h2>🏆 Main Events</h2>
+            <div id="athlete-input-m" class="card">
                 <select id="mEvent">
                     <option>100 Metre</option><option>200 Metre</option><option>400 Metre</option><option>800 Metre</option>
                     <option>1500 Metre</option><option>3 Kilometre</option><option>5 Kilometre</option>
                     <option>Long Jump</option><option>High Jump</option><option>Triple Jump</option>
                     <option>Javelin</option><option>Discus</option><option>Shot Put</option>
                 </select>
-                <input type="number" step="0.01" id="mScore" placeholder="Result"><input type="date" id="mDate">
+                <input type="number" step="0.01" id="mScore" placeholder="Score"><input type="date" id="mDate">
                 <button class="btn" style="background: var(--main)" onclick="saveData('Main')">SAVE RESULT</button>
             </div>
-            <div id="main-live-view"></div>
+            <div id="main-graphs" class="graph-slider"></div>
         </div>
 
         <div id="d-page" class="container">
-            <div id="athleteHeader" style="text-align:center"></div>
-            <h2>📊 Performance Summary</h2>
-            <div id="displayArea"></div>
-        </div>
-
-        <div id="a-page" class="container">
-            <h2>🤖 AIA Premium Coach</h2>
-            <div id="lock-screen" class="card" style="text-align: center;">
-                <p>Unlock AI Coaching & Monthly PDF Reports.</p>
-                <button class="btn" style="background:var(--premium)" onclick="payNow()">ACTIVATE SUBSCRIPTION</button>
-                <hr><input type="text" id="actCode" placeholder="Code (1234)"><button class="btn" onclick="unlock()">ENTER CODE</button>
-            </div>
-            <div id="ai-content" style="display:none;">
-                <div class="card" style="background: #f5f3ff; border: 1px solid #7c3aed;">
-                    <h3>📅 Monthly Analysis</h3>
-                    <p id="monthlyAnalysis">Scanning your progress... Please wait.</p>
-                </div>
-                <div class="card">
-                    <div id="chatWall" style="height:200px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
-                    <div style="display:flex; gap:5px;">
-                        <input type="text" id="chatInput" placeholder="Ask anything..."><button class="btn" style="width:70px; margin:0;" onclick="askAI()">ASK</button>
-                    </div>
-                </div>
+            <div id="coach-view" style="display:none;"><h3>Academy Athletes</h3><div id="athleteList"></div></div>
+            <div id="athlete-view">
+                <div id="athleteHeader" style="text-align:center"></div>
+                <h3>📊 Performance Analytics</h3>
+                <div id="overallStats" class="card" style="background: #f1f5f9;">Summary loading...</div>
             </div>
         </div>
 
+        <div id="a-page" class="container"><h2>🤖 AIA Elite</h2><div class="card">Unlock with 1234.</div></div>
         <div id="v-page" class="container">
-            <h2>💬 Academy Reviews</h2>
+            <h2>💬 Reviews</h2>
             <div class="card">
-                <input type="text" id="revName" placeholder="Name">
                 <select id="revStars"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select>
-                <textarea id="revText" placeholder="Share your experience..."></textarea>
-                <button class="btn" style="background: var(--primary)" onclick="submitReview()">POST REVIEW</button>
+                <textarea id="revText" placeholder="Message..."></textarea>
+                <button class="btn" style="background: var(--primary)" onclick="submitReview()">POST</button>
             </div>
-            <div id="globalReviewWall"></div>
+            <div id="reviewWall"></div>
         </div>
     </div>
 
@@ -117,77 +112,110 @@
     const firebaseConfig = { apiKey: "AIzaSyBXlSIIG2czsrKYMJ07H7ibhXqd7jpOQR0", databaseURL: "https://athletetracker-5efd6-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ID = 'user_v61_master_final';
-    let currentAthlete = "";
+    const ID = 'user_v69_final';
+    let currentUser = { name: "", role: "" };
 
-    function setAthlete() {
+    function toggleRoleFields() {
+        const r = document.getElementById('userRole').value;
+        document.getElementById('athleteFields').style.display = r === 'athlete' ? 'block' : 'none';
+        document.getElementById('coachFields').style.display = r === 'coach' ? 'block' : 'none';
+    }
+
+    function handleLogin() {
+        const r = document.getElementById('userRole').value;
         const n = document.getElementById('userAccessName').value.trim();
-        const p = document.getElementById('userPhotoUrl').value.trim() || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        if(n) { currentAthlete = n; db.ref(`${ID}/data/${n}`).update({ photo: p }); document.getElementById('login-screen').style.display='none'; document.getElementById('app-content').style.display='block'; startApp(); }
+        if(!n) return alert("Enter Name");
+
+        if(r === 'coach') {
+            if(document.getElementById('coachPassword').value !== "1234") return alert("Wrong Password");
+            currentUser = { name: n, role: 'coach' };
+        } else {
+            const p = document.getElementById('userPhotoUrl').value || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            currentUser = { name: n, role: 'athlete', photo: p };
+            db.ref(`${ID}/athletes/${n}`).update({ photo: p, name: n });
+        }
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('mainNav').style.display = 'flex';
+        document.getElementById('app-content').style.display = 'block';
+        initApp();
     }
 
     function showTab(id, btn) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active'); btn.classList.add('active');
-        if(id==='a-page' && localStorage.getItem('premium_v61')==='true') { 
-            document.getElementById('lock-screen').style.display='none'; 
-            document.getElementById('ai-content').style.display='block';
-            runMonthlyAI();
-        }
     }
 
-    function startApp() {
-        db.ref(`${ID}/data/${currentAthlete}`).on('value', snap => {
-            const pV = document.getElementById('practice-live-view'); const dash = document.getElementById('displayArea');
-            const data = snap.val(); pV.innerHTML = ''; dash.innerHTML = ''; if(!data) return;
-            document.getElementById('athleteHeader').innerHTML = `<img src="${data.photo}" class="profile-pic"><br><b>${currentAthlete}</b>`;
+    function initApp() {
+        if(currentUser.role === 'coach') {
+            document.getElementById('athlete-input-p').style.display = 'none';
+            document.getElementById('athlete-input-m').style.display = 'none';
+            document.getElementById('coach-view').style.display = 'block';
+            document.getElementById('athlete-view').style.display = 'none';
+            loadCoachDashboard();
+        } else {
+            loadAthleteData(currentUser.name);
+        }
+        loadReviews();
+    }
+
+    function loadCoachDashboard() {
+        db.ref(`${ID}/athletes`).on('value', snap => {
+            const list = document.getElementById('athleteList'); list.innerHTML = '';
+            snap.forEach(a => {
+                const ath = a.val();
+                const div = document.createElement('div'); div.className = 'card';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `<img src="${ath.photo}" style="width:30px; border-radius:50%;"> ${ath.name} - View Stats`;
+                div.onclick = () => { loadAthleteData(ath.name); showTab('p-page', document.getElementById('btn-p')); };
+                list.appendChild(div);
+            });
+        });
+    }
+
+    function loadAthleteData(name) {
+        db.ref(`${ID}/data/${name}`).on('value', snap => {
+            const data = snap.val(); 
+            const pArea = document.getElementById('practice-graphs'); pArea.innerHTML = '';
+            const mArea = document.getElementById('main-graphs'); mArea.innerHTML = '';
             
-            for(let cat in data) { if(cat==='photo') continue;
+            db.ref(`${ID}/athletes/${name}`).once('value', aSnap => {
+                document.getElementById('athleteHeader').innerHTML = `<img src="${aSnap.val().photo}" class="profile-pic"><h3>${name}</h3>`;
+            });
+
+            if(!data) return;
+            for(let cat in data) {
                 for(let e in data[cat]) {
                     const logs = Object.entries(data[cat][e]).map(([k,v])=>({k,...v})).sort((a,b)=>a.ts-b.ts);
-                    const gid = `g-${cat}-${e}`.replace(/\s/g,'');
-                    const gc = document.createElement('div'); gc.className = 'card';
+                    const gid = `g-${name}-${cat}-${e}`.replace(/\s/g,'');
+                    const card = document.createElement('div'); card.className = 'graph-card';
                     
-                    let advice = "Add 2 entries for AI Coaching.";
-                    let dietAdvice = "Diet: High Protein + Complex Carbs.";
-                    if(logs.length > 1) {
-                        const d = logs[logs.length-1].score - logs[logs.length-2].score;
-                        advice = d < 0 ? "🚀 <b>Improving!</b> Pichle session se better timing hai." : "⚠️ <b>Warning:</b> Performance thodi down hai, recovery ki zaroorat hai.";
-                        dietAdvice = d < 0 ? "Workout: Stick to current plan. Diet: Add Creatine & Eggs." : "Workout: Focus on technique, light session today. Diet: Increase Hydration & Vitamin C.";
-                    }
+                    let table = `<div style="font-size:11px; margin-top:10px; background:#f9f9f9; padding:5px; border-radius:10px;">`;
+                    logs.forEach(l => { table += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${l.date}: ${l.score}</span> <button class="del-btn" onclick="delEntry('${name}','${cat}','${e}','${l.k}')">Del</button></div>`; });
+                    table += `</div>`;
 
-                    let listHtml = `<div class="data-list">`;
-                    logs.forEach(l => { listHtml += `<div class="data-item"><span>${l.date}: <b>${l.score}</b></span> <button class="del-btn" onclick="deleteData('${cat}','${e}','${l.k}')">Del</button></div>`; });
-                    listHtml += `</div>`;
-
-                    gc.innerHTML = `<b>${e} Graph</b><canvas id="${gid}"></canvas><div class="ai-coach-box"><b>AI Coach:</b> ${advice}<br><br>${dietAdvice}</div>${listHtml}`;
-                    if(cat==='Practice') pV.appendChild(gc); else dash.appendChild(gc);
+                    card.innerHTML = `<b>${e}</b><canvas id="${gid}"></canvas><div class="ai-coach-tip"><b>AI Coach:</b> Consistency is great! Focus on explosive start.</div>${table}`;
+                    if(cat === 'Practice') pArea.appendChild(card); else mArea.appendChild(card);
                     setTimeout(() => new Chart(document.getElementById(gid), { type: 'line', data: { labels: logs.map(l=>l.date), datasets: [{ data: logs.map(l=>l.score), borderColor: '#2563eb', fill: false }] } }), 500);
                 }
             }
         });
-        db.ref(`${ID}/global_reviews`).on('value', snap => {
-            const wall = document.getElementById('globalReviewWall'); wall.innerHTML = '';
-            snap.forEach(c => { const d = c.val(); wall.innerHTML = `<div class="card"><b>${d.name}</b> ⭐${d.stars}<p>${d.msg}</p></div>` + wall.innerHTML; });
-        });
     }
 
-    function deleteData(cat, ev, key) { if(confirm("Delete this specific result?")) db.ref(`${ID}/data/${currentAthlete}/${cat}/${ev.replace(/\s/g,'')}/${key}`).remove(); }
-    function saveData(type) {
-        const p = type === 'Practice' ? 'p' : 'm';
-        const ev = document.getElementById(p+(type==='Practice'?'Drill':'Event')).value;
+    function delEntry(name, cat, ev, key) { if(confirm("Delete result?")) db.ref(`${ID}/data/${name}/${cat}/${ev.replace(/\s/g,'')}/${key}`).remove(); }
+    function saveData(cat) {
+        const p = cat === 'Practice' ? 'p' : 'm';
+        const ev = document.getElementById(p+(cat==='Practice'?'Drill':'Event')).value;
         const sc = parseFloat(document.getElementById(p+'Score').value);
         const dt = document.getElementById(p+'Date').value;
-        if(sc && dt) db.ref(`${ID}/data/${currentAthlete}/${type}/${ev.replace(/\s/g,'')}`).push({ score: sc, date: dt, ts: Date.now() });
+        if(sc && dt) db.ref(`${ID}/data/${currentUser.name}/${cat}/${ev.replace(/\s/g,'')}`).push({ score: sc, date: dt, ts: Date.now() });
     }
-    function submitReview() { db.ref(`${ID}/global_reviews`).push({ name: document.getElementById('revName').value, stars: document.getElementById('revStars').value, msg: document.getElementById('revText').value }); }
-    function unlock() { if(document.getElementById('actCode').value === "1234") { localStorage.setItem('premium_v61', 'true'); location.reload(); }}
-    function runMonthlyAI() { document.getElementById('monthlyAnalysis').innerHTML = `Hi ${currentAthlete}, is mahine aapne 8% improvement dikhayi hai. Aapka Javelin aur 100m ka trend upar ja raha hai. Next Month Goal: Power Clean and Squats increase kijiye.`; }
-    function askAI() { 
-        const i = document.getElementById('chatInput'); const w = document.getElementById('chatWall');
-        if(i.value) { w.innerHTML += `<div style="text-align:right; color:blue;">Me: ${i.value}</div>`; 
-        setTimeout(()=> { w.innerHTML += `<div style="color:green;">Coach: Focused raho, consistency hi sab kuch hai. Aaj recovery par dhyan do.</div>`; w.scrollTop = w.scrollHeight; }, 600); i.value=''; }
+    function submitReview() { db.ref(`${ID}/reviews`).push({ name: currentUser.name, stars: document.getElementById('revStars').value, msg: document.getElementById('revText').value }); }
+    function loadReviews() {
+        db.ref(`${ID}/reviews`).on('value', snap => {
+            const wall = document.getElementById('reviewWall'); wall.innerHTML = '';
+            snap.forEach(r => { const d = r.val(); wall.innerHTML = `<div class="card"><b>${d.name}</b> ⭐${d.stars}<p>${d.msg}</p></div>` + wall.innerHTML; });
+        });
     }
 </script>
 </body>
