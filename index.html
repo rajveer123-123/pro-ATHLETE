@@ -232,59 +232,28 @@
     function closeDetails() { document.getElementById('flashcard-list').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
 
     // GLOBAL REVIEWS (FIXED LISTENER)
-  // GLOBAL REVIEWS (FIXED VERSION)
-function submitReview() {
-    const n = document.getElementById('revName').value.trim();
-    const m = document.getElementById('revText').value.trim();
-    
-    // You MUST select a star and fill name/message
-    if (n && m && selectedStars > 0) {
-        // MATCHED TO YOUR RULES: GLOBAL_REVIEWS
-        db.ref('GLOBAL_REVIEWS').push({ 
-            name: n, 
-            stars: selectedStars, 
-            message: m, 
-            ts: Date.now() 
-        }).then(() => {
-            alert("Review saved to Global Database!");
-            document.getElementById('revText').value = ''; 
-            document.getElementById('revName').value = '';
-            setStar(0);
-        }).catch((error) => {
-            console.error("Firebase Error:", error);
-            alert("Permission Denied: Check your Firebase Rules!");
-        });
-    } else {
-        alert("Please fill in Name, Message, and click the Stars!");
+    function submitReview() {
+        const n = document.getElementById('revName').value.trim(), m = document.getElementById('revText').value.trim();
+        if(n && m && selectedStars > 0) {
+            db.ref(`GLOBAL_REVIEWS`).push({ name: n, stars: selectedStars, message: m, ts: Date.now() }).then(() => {
+                document.getElementById('revText').value = ''; setStar(0);
+            });
+        }
     }
-}
 
-// Global Listener - Shows reviews for everyone
-db.ref('GLOBAL_REVIEWS').on('value', snap => {
-    const wall = document.getElementById('reviewWall');
-    const countBadge = document.getElementById('revCount');
-    
-    if (countBadge) countBadge.innerText = snap.numChildren();
-    wall.innerHTML = '';
-    
-    const reviews = [];
-    snap.forEach(child => { reviews.push(child.val()); });
-    
-    // Sort newest first
-    reviews.sort((a, b) => b.ts - a.ts).forEach(d => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.style.borderLeft = "5px solid var(--ai-purple)";
-        div.innerHTML = `
-            <b>${d.name}</b> 
-            <span style="color:#fbbf24">${'★'.repeat(d.stars)}</span>
-            <p style="font-size:13px; margin-top:5px;">${d.message}</p>
-        `;
-        wall.appendChild(div);
+    db.ref(`GLOBAL_REVIEWS`).on('value', snap => {
+        const wall = document.getElementById('reviewWall');
+        document.getElementById('revCount').innerText = snap.numChildren();
+        wall.innerHTML = '';
+        const reviews = [];
+        snap.forEach(c => { reviews.push(c.val()); });
+        reviews.sort((a, b) => b.ts - a.ts).forEach(d => {
+            const div = document.createElement('div'); div.className = 'card';
+            div.style.borderLeft = "5px solid var(--ai-purple)";
+            div.innerHTML = `<b>${d.name}</b> <span style="color:#fbbf24">${'★'.repeat(d.stars)}</span><p style="font-size:13px; margin-top:5px;">${d.message}</p>`;
+            wall.appendChild(div);
+        });
     });
-});
-    
 </script>
 </body>
 </html>
-
